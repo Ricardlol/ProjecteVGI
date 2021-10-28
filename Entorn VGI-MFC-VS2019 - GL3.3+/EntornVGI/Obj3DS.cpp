@@ -162,11 +162,11 @@ bool Obj_3DS::Carregar3DS(char *nomfitxer)
 //
 // Funció que dibuixa l'pbjecte 3DS. Si el parametre es false crea una llista nova.
 //
-GLuint Obj_3DS::Dibuixa3DS(bool actualitza,int prim_Id, int& nvert)
+void Obj_3DS::Dibuixa3DS(bool actualitza,int prim_Id)
 {
 	
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
 	std::vector <double> vertices, colors, normals, textures;		// Definició vectors dinàmics per a vertexs i colors 
 	vertices.resize(0);		colors.resize(0);	normals.resize(0);		textures.resize(0);// Reinicialitzar vectors
 
@@ -287,10 +287,11 @@ GLuint Obj_3DS::Dibuixa3DS(bool actualitza,int prim_Id, int& nvert)
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_TRIANGLES_VAO(prim_Id, vertices, normals, colors, textures);
-	nvert = (int)nv / 3;
-	return vaoId;
-
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	Set_vaoId(prim_Id, vaoId);
+	Set_vboId(prim_Id, vboId);
+	int nvert = (int)nv / 3;
+	Set_nVertexs(prim_Id, nvert);
 }
 
 

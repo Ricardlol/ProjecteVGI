@@ -45,20 +45,7 @@
 #include "material.h"
 #include "glut_geometry.h"
 
- // VAOId: Vector d'identificadors de Vertex Arrays Objects per a primitives glut_geometry.
-								 // Cada posició del vector correspon a una primitiva:
-								 // 0: GLUT_CUBE, 1:GLUT_CUBE_RGB, 2:GLUT_SPHERE, 3: GLUT_CONE, 4: GLUT_CYLINDER,
-								 // 5: GLUT_TORUS, 6: GLUT_DODECAHEDRON, 7: GLUT_OCTAHEDRON, 8: GLUT_TETRAEDRON,
-								 // 9: GLUT_ICOSAHEDRON, 10: GLUT_RHOMBICDODECAHEDRON, 11: GLUT_SIERPINSKISPONGE, 
-								 // 12: GLU_TEAPOT, 12: GLU_CYLINDER, 14: GLU_DISK, 15: GLU_PARTIALDISK,
-								 // 16: GLU_SPHERE, 17: CRV_POLYLINE, 18: CRV_LEMNISCATA2D, 19: CRV_LEMNISCATA3D.
-								 // 20: CRV_BSPLINE, 21: CRV_BEZIER, 22:SUP_BSPLINE, 23: SUP_BEZIER, 24: GLUT_LINES,
-								// 25: GLUT_TRIANGLES, 26: CUBE_SKYBOX, 27: GLU_CILINDRE_SENCER, 28: MAR_FRACTAL_VAO, 29: O_FRACTAL_VAO,
-								// 30: FIT_3DS, 31: FIT_3DS2, 32: FIT_3DS3, 33: FIT_OBJ, 34:FIT_OBJ2, 35:FIT_OBJ3, 36:GLUT_USER1, 
-								// 37: GLUT_USER2, 38: GLUT_USER3, 39: GLUT_USER4.
-GLint VAOId[MAX_SIZE_VAOID] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
-
-// VBOId: Vector d'identificadors de Vertex Buffer Objects per a primitives glut_geometry.
+// VAOList: Vector d'identificadors de Vertex Buffer Objects per a primitives glut_geometry.
 								// Cada posició del vector correspon a una primitiva:
 								// 0: GLUT_CUBE, 1:GLUT_CUBE_RGB, 2:GLUT_SPHERE, 3: GLUT_CONE, 4: GLUT_CYLINDER,
 								// 5: GLUT_TORUS, 6: GLUT_DODECAHEDRON, 7: GLUT_OCTAHEDRON, 8: GLUT_TETRAEDRON,
@@ -68,11 +55,11 @@ GLint VAOId[MAX_SIZE_VAOID] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 								// 20: CRV_BSPLINE, 21: CRV_BEZIER, 22:SUP_BSPLINE, 23: SUP_BEZIER, 24: GLUT_LINES,
 								// 25: GLUT_TRIANGLES, 26: CUBE_SKYBOX, 27: GLU_CILINDRE_SENCER, 28: MAR_FRACTAL_VAO, 29: O_FRACTAL_VAO,
 								// 30: FIT_3DS, 31: FIT_3DS2, 32: FIT_3DS3, 33: FIT_OBJ, 34:FIT_OBJ2, 35:FIT_OBJ3, 36:GLUT_USER1, 
-								// 37: GLUT_USER2, 38: GLUT_USER3, 39: GLUT_USER4.
-GLint VBOId[MAX_SIZE_VBOID] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+								// 37: GLUT_USER2, 38: GLUT_USER3, 39: GLUT_USER4, 40: GLUT_USER5, 41: GLUT_USER6.
+								// 42: GLUT_USER7, 43: GLUT_USER8, 44: GLUT_USER9.
+CVAO VAOList[MAX_SIZE_VAOID];
 
-
-// Clor de primitiva
+// Color de primitiva
 GLdouble cColor[4] = { 0.0, 0.0, 0.0, 1.0 };
 
 /*
@@ -115,21 +102,99 @@ GLdouble cColor[4] = { 0.0, 0.0, 0.0, 1.0 };
  */
 
 
-/* -- INTERFACE FUNCTIONS -------------------------------------------------- */
-/*
- * Draws a solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
- */
+// -- INTERFACE FUNCTIONS -------------------------------------------------- 
+
+//------------------- SETS (o PUTS)
 void SetColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha)
 {
 	cColor[0] = red; cColor[1] = green; cColor[2] = blue; cColor[3] = alpha; 
 }
 
-void deleteVAO(GLint k)
-{	GLuint vaoId;
-	GLuint vboId;
+void Set_VAOList(GLint k, CVAO auxVAO)
+{
+	VAOList[k].vaoId = auxVAO.vaoId;
+	VAOList[k].vboId = auxVAO.vboId;
+	VAOList[k].nVertexs = auxVAO.nVertexs;
+}
 
-	vaoId = VAOId[k];
-	vboId = VBOId[k];
+void Set_vaoId(GLuint k, GLuint vaoId)
+{
+	VAOList[k].vaoId = vaoId;
+}
+
+void Set_vboId(GLuint k, GLuint vboId)
+{
+	VAOList[k].vboId = vboId;
+}
+
+void Set_nVertexs(GLuint k, GLint nvertexs)
+{
+	VAOList[k].nVertexs = nvertexs;
+}
+
+//------------------- GETS
+CVAO Get_VAOList(GLint k)
+{	CVAO auxVAO; 
+
+	auxVAO.vaoId = VAOList[k].vaoId;
+	auxVAO.vboId = VAOList[k].vboId;
+	auxVAO.nVertexs = VAOList[k].nVertexs;
+	
+	return auxVAO;
+}
+
+GLuint Get_VAOId(GLint k)
+{
+	return VAOList[k].vaoId;
+}
+
+
+void initVAOList()
+{	int i;
+
+	for (i = 0; i < MAX_SIZE_VAOID; i++)
+	{	VAOList[i].vaoId = -1;
+		VAOList[i].vboId = -1;
+		VAOList[i].nVertexs = 0;
+	}
+
+}
+
+void netejaVAOList()
+{	int i;
+	for (i = 0; i < MAX_SIZE_VAOID; i++)
+		{	if (VAOList[i].vaoId != -1) deleteVAOList(i);
+		}
+
+}
+
+void draw_TriVAO_Object(GLint k)
+{
+// Recuperar identificadors VAO i nvertexs dels vector VAOList pr a dibuixar VAO
+	if (VAOList[k].vaoId != -1) {
+		glBindVertexArray(VAOList[k].vaoId);
+		//glBindBuffer(GL_ARRAY_BUFFER, vboId);
+		glDrawArrays(GL_TRIANGLES, 0, VAOList[k].nVertexs);
+		glBindVertexArray(0);
+	}
+}
+
+
+void draw_LinVAO_Object(GLint k)
+{
+// Recuperar identificador VAO a vector VAOId
+	if (VAOList[k].vaoId != -1) {
+		glBindVertexArray(VAOList[k].vaoId);
+		glDrawArrays(GL_LINES, 0, VAOList[k].nVertexs);
+		glBindVertexArray(0);
+	}
+}
+
+
+void deleteVAOList(GLint k)
+{
+	GLuint vaoId = VAOList[k].vaoId;
+	GLuint vboId = VAOList[k].vboId;
 
 	if (vaoId != -1)
 	{	glBindVertexArray(vaoId);
@@ -143,16 +208,18 @@ void deleteVAO(GLint k)
 		// Once bound with 0, all pointers in gl*Pointer() behave as real
 		// pointer, so, normal vertex array operations are re-activated
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(MAX_SIZE_VBOID, &vboId);
+		glDeleteBuffers(1, &vboId);
 
 		// Unbind and delete VAO
 		glBindVertexArray(0);
 		glDeleteVertexArrays(1, &vaoId);
 
-		VBOId[k] = -1;
-		VAOId[k] = -1;
+		VAOList[k].vboId = -1;
+		VAOList[k].vaoId = -1;
+		VAOList[k].nVertexs = 0;
 	}
 }
+
 
 /* ----------CUBE -----------------------------------------------------------*/
 
@@ -161,21 +228,32 @@ void deleteVAO(GLint k)
  */
 void glutSolidCube(GLdouble dSize)
 {
-	glutSolidCube_VAO(dSize);
-	drawSolidCube();
-	deleteVAO(GLUT_CUBE);
+	CVAO cubeVAO;
+	cubeVAO=loadglutSolidCube_VAO(dSize);	// glutSolidCube_VAO(dSize);
+	Set_VAOList(GLUT_CUBE, cubeVAO);
+	draw_TriVAO_Object(GLUT_CUBE); //drawSolidCube();
+	deleteVAOList(GLUT_CUBE);
+}
+
+/*--------------------------LOAD Piece Tetris-------------------------------------------*/
+
+void glutSolidTetris(GLdouble dSize, int idPiece)
+{
+	CVAO cubeVAO;
+	cubeVAO = loadglutSolidCube_VAO(dSize);	// glutSolidCube_VAO(dSize);
+	Set_VAOList(idPiece, cubeVAO);
+	draw_TriVAO_Object(idPiece); //drawSolidCube();
+	deleteVAOList(idPiece);
 }
 
 /*
- * Draws a solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
+ * Load a solid cube as a VAO. Code contributed by Andreas Umbach <marvin@dataway.ch> end Enric Marti <enric.marti@uab.cat>
  */
-void glutSolidCube_VAO( GLdouble dSize )
+CVAO loadglutSolidCube_VAO(GLdouble dSize)
 {
-    GLdouble size = dSize * 0.5f;
-	GLuint vaoId = 0;
-
-#   define V(a,b,c) glVertex3d( a size, b size, c size );
-#   define N(a,b,c) glNormal3d( a, b, c );
+	GLdouble size = dSize * 0.5f;
+	GLuint vaoId = 36, vboId = 36;
+	CVAO auxVAO;
 
 	// cube ///////////////////////////////////////////////////////////////////////
 	//    v6----- v5
@@ -196,7 +274,7 @@ void glutSolidCube_VAO( GLdouble dSize )
 // vertex is 3 components (x,y,z) of floats, therefore, the size of vertex
 // array is 72 floats (24 * 3 = 72). The size of each float is 4 bytes (72 * 4 = 288 bytes)
 	//GLdouble vertices[] = { 
-	std::vector<double> vertices = { 
+	std::vector<double> vertices = {
 		 size,  size,  size, -size,  size,  size, -size, -size,  size,      // v0-v1-v2 (front)
 		-size, -size,  size,  size, -size,  size,  size,  size,  size,      // v2-v3-v0
 		 size,  size,  size,  size, -size,  size,  size, -size, -size,      // v0-v3-v4 (right)
@@ -212,7 +290,7 @@ void glutSolidCube_VAO( GLdouble dSize )
 
 // Normal array
 	//GLdouble normals[] = {
-	std::vector<double> normals = { 
+	std::vector<double> normals = {
 		0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,   // v0-v1-v2 (front)
 		0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,   // v2-v3-v0
 		1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,   // v0-v3-v4 (right)
@@ -244,7 +322,7 @@ void glutSolidCube_VAO( GLdouble dSize )
 
 // Texture Array
 	//GLdouble textures[] = {
-	std::vector<double> textures = { 
+	std::vector<double> textures = {
 		1.0, 1.0, 1.0, 0.0, 0.0, 0.0,      // v0-v1-v2 (front)
 		0.0, 0.0, 0.0, 1.0, 1.0, 1.0,      // v2-v3-v0
 		1.0, 1.0, 0.0, 1.0, 0.0, 0.0,      // v0-v3-v4 (right)
@@ -258,43 +336,21 @@ void glutSolidCube_VAO( GLdouble dSize )
 		0.0, 0.0, 1.0, 0.0, 1.0, 1.0,      // v4-v7-v6 (back)
 		1.0, 1.0, 0.0, 1.0, 0.0, 0.0 };    // v6-v5-v4
 
-	vaoId = load_TRIANGLES_VAO(GLUT_CUBE, vertices, normals, colors, textures);
-	//VAOId[GLUT_CUBE] = vaoId;
-
-#   undef V
-#   undef N
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+	auxVAO.vaoId = vaoId;
+	auxVAO.vboId = vboId;
+	auxVAO.nVertexs = 36;
+	return auxVAO;
 }
-
-void drawSolidCube()
-{
-	GLuint vaoId = 0;
-
-// Recuperar identificadors VAO,VAO dels vectors VAOId, VAOId
-	vaoId = VAOId[GLUT_CUBE];
-	if (vaoId != -1)	{	glBindVertexArray(vaoId);
-							//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-							glDrawArrays(GL_TRIANGLES, 0, 36);
-							glBindVertexArray(0);
-						}
-}
-
 
 /*
 * Draws a solid cube with RGB color model. Code contributed by Andreas Umbach <marvin@dataway.ch>
 */
-void glutSolidCubeRGB(GLdouble dSize)
-{
-	glutSolidCubeRGB_VAO(dSize);
-	drawSolidCubeRGB();
-	deleteVAO(GLUT_CUBE_RGB);
-}
-/*
-* Draws a solid cube with RGB color model. Code contributed by Andreas Umbach <marvin@dataway.ch>
-*/
-void glutSolidCubeRGB_VAO(GLdouble dSize)
+CVAO loadglutSolidCubeRGB_VAO(GLdouble dSize)
 {
 	GLdouble size = dSize * 0.5f;
-	GLuint vaoId = 0;
+	GLuint vaoId = 0, vboId = 0;
+	CVAO auxVAO;
 
 //    FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutSolidCube" );
 
@@ -375,54 +431,11 @@ void glutSolidCubeRGB_VAO(GLdouble dSize)
 		0, 0, 1, 0, 1, 1,      // v4-v7-v6 (back)
 		1, 1, 0, 1, 0, 0 };    // v6-v5-v4
 
-	vaoId = load_TRIANGLES_VAO(GLUT_CUBE_RGB, vertices, normals, colors, textures);
-	//VAOId[GLUT_CUBE_RGB] = vaoId;
-}
-
-void drawSolidCubeRGB()
-{
-	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_CUBE_RGB];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, VAOId);
-						glDrawArrays(GL_TRIANGLES, 0, 36);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					 }
-}
-
-
-/*
-* Draws a solid cube without VAO and texture coordinates generated by equation (GEN_S, GEN_T).
-Code contributed by Andreas Umbach <marvin@dataway.ch>
-*/
-void glutSolidCubeT(GLdouble dSize)
-{
-	GLfloat size = dSize * 0.5f;
-
-#   define V(a,b,c) glVertex3d( a size, b size, c size );
-#   define N(a,b,c) glNormal3d( a, b, c );
-
-//---- DEFINICIÓ COORDENADES TEXTURA
-//	Activa_Coordenades_Textura();
-
-// PWO: Again, I dared to convert the code to use macros... 
-	glBegin(GL_QUADS);
-// Cub SENSE Textura incrustada glTexCoord2f() -> Activar Coordenades Textura
-		N(1.0, 0.0, 0.0); V(+, -, +); V(+, -, -); V(+, +, -); V(+, +, +);
-		N(0.0, 1.0, 0.0);  V(+, +, +); V(+, +, -); V(-, +, -); V(-, +, +);
-		N(0.0, 0.0, 1.0); V(+, +, +); V(-, +, +); V(-, -, +); V(+, -, +);
-		N(-1.0, 0.0, 0.0); V(-, -, +); V(-, +, +); V(-, +, -); V(-, -, -);
-		N(0.0, -1.0, 0.0); V(-, -, +); V(-, -, -); V(+, -, -); V(+, -, +);
-		N(0.0, 0.0, -1.0); V(-, -, -); V(-, +, -); V(+, +, -); V(+, -, -);
-	glEnd();
-
-//---- DEFINICIÓ COORDENADES TEXTURA
-//	Desactiva_Coordenades_Textura();
-#   undef V
-#   undef N
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	auxVAO.vaoId = vaoId;
+	auxVAO.vboId = vboId;
+	auxVAO.nVertexs = 36;
+	return auxVAO;
 }
 
 
@@ -432,15 +445,17 @@ void glutSolidCubeT(GLdouble dSize)
  */
 void CubeSkybox(GLdouble dSize)
 {
-	loadCubeSkybox_VAO();
+	CVAO CubeSkyVAO;
+	CubeSkyVAO = loadCubeSkybox_VAO();
+	Set_VAOList(CUBE_SKYBOX,CubeSkyVAO);
 	drawCubeSkybox();
-	deleteVAO(CUBE_SKYBOX);
+	deleteVAOList(CUBE_SKYBOX);
 }
 
 /*
  * Draws a solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
  */
-GLuint loadCubeSkybox_VAO()
+CVAO loadCubeSkybox_VAO()
 {
 	GLfloat skyboxVertices[] = {
 		// positions          
@@ -489,6 +504,7 @@ GLuint loadCubeSkybox_VAO()
 
 // skybox VAO
 	GLuint skyboxVAO, skyboxVBO;
+	CVAO cubeSkyVAO;	cubeSkyVAO.vaoId = -1;	cubeSkyVAO.vboId = -1;	cubeSkyVAO.nVertexs = 0;
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
 	glBindVertexArray(skyboxVAO);
@@ -497,20 +513,20 @@ GLuint loadCubeSkybox_VAO()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-	VAOId[CUBE_SKYBOX] = skyboxVAO;
-	return skyboxVAO;
+	cubeSkyVAO.vaoId = skyboxVAO;
+	cubeSkyVAO.vboId = skyboxVBO;
+	cubeSkyVAO.nVertexs = 36;
+	return cubeSkyVAO;
 }
 
 void drawCubeSkybox()
 {
-	GLuint vaoId = 0;
 
-// Recuperar identificadors VAO, VBO dels vectors VAOId, VBOId
-	vaoId = VAOId[CUBE_SKYBOX];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						glDrawArrays(GL_TRIANGLES, 0, 36);
-						glBindVertexArray(0);
-					}
+// Recuperar identificadors VAO, VBO dels vector VAOList
+	if (VAOList[CUBE_SKYBOX].vaoId != -1) {	glBindVertexArray(VAOList[CUBE_SKYBOX].vaoId);
+											glDrawArrays(GL_TRIANGLES, 0, VAOList[CUBE_SKYBOX].nVertexs);
+											glBindVertexArray(0);
+										}
 }
 
 
@@ -530,17 +546,19 @@ void drawCubeSkybox()
  */
 void glutSolidSphere(GLdouble radius, GLint slices, GLint stacks)
 {
-	int nvertexs = glutSolidSphere_VAO(radius, slices, stacks);
-	drawSolidSphere(nvertexs);
-	deleteVAO(GLUT_SPHERE);
+	CVAO sphereVAO = loadglutSolidSphere_VAO(radius, slices, stacks);
+	Set_VAOList(GLUT_SPHERE, sphereVAO);
+	draw_TriVAO_Object(GLUT_SPHERE); //drawSolidSphere(nvertexs);
+	deleteVAOList(GLUT_SPHERE);
 }
 
 /*
  * Draws a solid sphere in VAO
  */
-GLint glutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
+CVAO loadglutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
 {
     int i,j;
+	CVAO sphereVAO;
 
 /* Adjust z and radius as stacks are drawn. */
     double z0,z1;
@@ -551,7 +569,7 @@ GLint glutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
     double *sint2,*cost2;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -714,8 +732,10 @@ GLint glutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_TRIANGLES_VAO(GLUT_SPHERE, vertices, normals, colors, textures);
-	//VAOId[GLUT_SPHERE] = vaoId;
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	sphereVAO.vaoId = vaoId;
+	sphereVAO.vboId = vboId;
+	sphereVAO.nVertexs = (int) nv / 3;
 
 //---- DEFINICIÓ COORDENADES TEXTURA
 	//Desactiva_Coordenades_Textura();
@@ -726,21 +746,7 @@ GLint glutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
     free(sint2);
     free(cost2);
 
-	return int(nv / 3);
-}
-
-void drawSolidSphere(GLint nvert)
-{
-	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_SPHERE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
+	return sphereVAO;
 }
 
 
@@ -787,15 +793,16 @@ void fghCircleTable(double **sint,double **cost,const int n)
 */
 void glutSolidCone(GLdouble base, GLdouble height, GLint slices, GLint stacks)
 {
-	int nvertexs = glutSolidCone_VAO(base, height, slices, stacks);
-	drawSolidCone(nvertexs);
-	deleteVAO(GLUT_CONE);
+	CVAO conusVAO = loadglutSolidCone_VAO(base, height, slices, stacks);
+	Set_VAOList(GLUT_CONE, conusVAO); // drawSolidCone(nvertexs);
+	draw_TriVAO_Object(GLUT_CONE);
+	deleteVAOList(GLUT_CONE);
 }
 
 /*
  * Draws a solid cone
  */
-GLint glutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stacks)
+CVAO loadglutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stacks)
 {
     int i,j;
 
@@ -814,9 +821,10 @@ GLint glutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stac
     double *sint,*cost;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO conusVAO;			conusVAO.vaoId = -1;	conusVAO.vboId = -1;	conusVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
-	vertices.resize(0);		normals.resize(0);		colors.resize(0);	 textures.resize(0);			// Reinicialitzar vectors
+	vertices.resize(0);		normals.resize(0);		colors.resize(0);		textures.resize(0);			// Reinicialitzar vectors
 
 // Obtenir color actual definit en OpenGL amb glColor();
 	//GLfloat cColor[4];
@@ -957,29 +965,16 @@ GLint glutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stac
 //---- DEFINICIÓ COORDENADES TEXTURA
 	//Desactiva_Coordenades_Textura();
 
-	vaoId = load_TRIANGLES_VAO(GLUT_CONE, vertices, normals, colors, textures);
-	//VAOId[GLUT_CONE] = vaoId;
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	conusVAO.vaoId = vaoId;
+	conusVAO.vboId = vboId;
+	conusVAO.nVertexs = int (nv / 3);
 
 /* Release sin and cos tables */
     free(sint);
     free(cost);
 
-	return int(nv / 3);
-}
-
-
-void drawSolidCone(GLint nvert)
-{
-	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_CONE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId); 
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
+	return conusVAO;
 }
 
 /* ---------- CYLINDER --------------------------------------------------*/
@@ -988,15 +983,16 @@ void drawSolidCone(GLint nvert)
 */
 void glutSolidCylinder(GLdouble radius, GLdouble height, GLint slices, GLint stacks)
 {
-	int nvertexs = glutSolidCylinder_VAO(radius, height, slices, stacks);
-	drawSolidCylinder(nvertexs);
-	deleteVAO(GLUT_CYLINDER);
+	CVAO cilindreVAO = loadglutSolidCylinder_VAO(radius, height, slices, stacks);
+	Set_VAOList(GLUT_CYLINDER, cilindreVAO);
+	draw_TriVAO_Object(GLUT_CYLINDER);
+	deleteVAOList(GLUT_CYLINDER);
 }
 
 /*
  * Draws a solid cylinder in VAO
  */
-GLint glutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLint stacks)
+CVAO loadglutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLint stacks)
 {
     int i,j;
 
@@ -1008,7 +1004,8 @@ GLint glutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLin
     double *sint,*cost;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO cilindreVAO;		cilindreVAO.vaoId = -1;		cilindreVAO.vboId = -1;	cilindreVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -1160,46 +1157,35 @@ GLint glutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLin
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLUT_CYLINDER, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	cilindreVAO.vaoId = vaoId;
+	cilindreVAO.vboId = vboId;
+	cilindreVAO.nVertexs = (int)nv / 3;
 
-/* Release sin and cos tables */
+/* Release sVAOin and cos tables */
     free(sint);
     free(cost);
 
-	return int(nv / 3);
+	return cilindreVAO;
 }
 
-
-void drawSolidCylinder(GLint nvert)
-{
-	GLuint vaoId = 0;
-	
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_CYLINDER];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 /* ---------- TORUS -----------------------------------------------------*/
-
 /*
 *Draws a solid torus
 */
 void glutSolidTorus(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings)
 {
-	int nvertexs = glutSolidTorus_VAO(dInnerRadius, dOuterRadius, nSides, nRings);
-	drawSolidTorus(nvertexs);
-	deleteVAO(GLUT_TORUS);
+	CVAO torusVAO = loadglutSolidTorus_VAO(dInnerRadius, dOuterRadius, nSides, nRings);
+	Set_VAOList(GLUT_TORUS, torusVAO);
+	draw_TriVAO_Object(GLUT_TORUS); // drawSolidTorus(nvertexs);
+	deleteVAOList(GLUT_TORUS);
 }
 
 /*
  * Draws a solid torus in VAO
  */
-GLint glutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings)
+CVAO loadglutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings)
 {
   double  iradius = dInnerRadius, oradius = dOuterRadius, phi, psi, dpsi, dphi;
   double *vertex, *normal;
@@ -1209,7 +1195,9 @@ GLint glutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSi
   CPunt3D val;
 
 // VAO
-  GLuint vaoId = 0;
+  GLuint vaoId = 0;		GLuint vboId = 0;
+  CVAO torusVAO;
+  torusVAO.vaoId = -1;	torusVAO.vboId = -1;		torusVAO.nVertexs = 0;
   std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
   //vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
   vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -1327,49 +1315,40 @@ GLint glutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSi
 // ------------------------ VAO
   std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-  vaoId = load_TRIANGLES_VAO(GLUT_TORUS, vertices, normals, colors, textures);
-  //VAOId[GLUT_TORUS] = vaoId;
+  vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+  torusVAO.vaoId = vaoId;
+  torusVAO.vboId = vboId;
+  torusVAO.nVertexs = (int)nv / 3;
 
   free ( vertex ) ;
   free ( normal ) ;
 
-  return int(nv / 3);
+  return torusVAO;
 //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
 }
 
-void drawSolidTorus(GLint nvert)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_TORUS];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
-
 /* ---------- DODECAHEDRON -----------------------------------------------------*/
-
 /*
 * Draws a solid dodecahedron
  */
 void glutSolidDodecahedron(void)
 {
-	glutSolidDodecahedron_VAO();
-	drawSolidDodecahedron();
-	deleteVAO(GLUT_DODECAHEDRON);
+	CVAO dodeVAO = loadglutSolidDodecahedron_VAO();
+	Set_VAOList(GLUT_DODECAHEDRON, dodeVAO);
+	draw_TriVAO_Object(GLUT_DODECAHEDRON); // drawSolidDodecahedron();
+	deleteVAOList(GLUT_DODECAHEDRON);
 }
 
 /*
  * Draws a solid dodecahedron in VAO
  */
-void glutSolidDodecahedron_VAO( void )
+CVAO loadglutSolidDodecahedron_VAO( void )
 {
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;	GLuint vboId = 0;
+	CVAO dodeVAO;
+	dodeVAO.vaoId = -1;		dodeVAO.vboId = -1;		dodeVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2130,26 +2109,14 @@ void glutSolidDodecahedron_VAO( void )
   std::vector <int>::size_type nv = vertices.size();		// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-  vaoId = load_TRIANGLES_VAO(GLUT_DODECAHEDRON, vertices, normals, colors, textures);
-
+  vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+  dodeVAO.vaoId = vaoId;
+  dodeVAO.vboId = vboId;
+  dodeVAO.nVertexs = 108;
+  return dodeVAO;
  //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
 }
-
-void drawSolidDodecahedron()
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_DODECAHEDRON];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, 108);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-	
-}
-
 
 /* ---------- OCTAHEDRON -----------------------------------------------------*/
 /*
@@ -2157,21 +2124,22 @@ void drawSolidDodecahedron()
  */
 void glutSolidOctahedron(void)
 {
-	glutSolidOctahedron_VAO();
-	drawSolidOctahedron();
-	deleteVAO(GLUT_OCTAHEDRON);
+	CVAO octaVAO = loadglutSolidOctahedron_VAO();
+	Set_VAOList(GLUT_OCTAHEDRON, octaVAO);
+	draw_TriVAO_Object(GLUT_OCTAHEDRON); // drawSolidOctahedron();
+	deleteVAOList(GLUT_OCTAHEDRON);
 }
 
 
 /*
 * Draws a solid octahedron
  */
-void glutSolidOctahedron_VAO( void )
+CVAO loadglutSolidOctahedron_VAO(void)
 {
 
 // VAO
-	GLuint vaoId = 0;
-
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO octaVAO;	octaVAO.vaoId = -1;	octaVAO.vboId = -1;		octaVAO.nVertexs = 0;
 // Obtenir color actual definit en OpenGL amb glColor();
 	//GLdouble cColor[4];
 	//glGetDoublev(GL_CURRENT_COLOR, cColor);
@@ -2247,24 +2215,15 @@ void glutSolidOctahedron_VAO( void )
 */
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId= load_TRIANGLES_VAO(GLUT_OCTAHEDRON, vertices, normals, colors, textures);
-
+	vaoId= load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	octaVAO.vaoId = vaoId;
+	octaVAO.vboId = vboId;
+	octaVAO.nVertexs = 24;
+	return octaVAO;
  //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
 }
 
-void drawSolidOctahedron()
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_OCTAHEDRON];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, 24);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 /* ---------- TETRAHEDRON -----------------------------------------------------*/
 /*
@@ -2272,18 +2231,20 @@ void drawSolidOctahedron()
  */
 void glutSolidTetrahedron(void)
 {
-	glutSolidTetrahedron_VAO();
-	drawSolidTetrahedron();
-	deleteVAO(GLUT_TETRAHEDRON);
+	CVAO tetraVAO =loadglutSolidTetrahedron_VAO();
+	Set_VAOList(GLUT_TETRAHEDRON, tetraVAO);
+	draw_TriVAO_Object(GLUT_TETRAHEDRON);
+	deleteVAOList(GLUT_TETRAHEDRON);
 }
 
 /*
 * Draws a solid tetrahedron in VAO
  */
-void glutSolidTetrahedron_VAO( void )
+CVAO loadglutSolidTetrahedron_VAO( void )
 {
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO tetraVAO;		tetraVAO.vaoId = -1;		tetraVAO.vboId = -1;		tetraVAO.nVertexs = 0;
 
 // Obtenir color actual definit en OpenGL amb glColor();
 	//GLfloat cColor[4];
@@ -2339,26 +2300,14 @@ void glutSolidTetrahedron_VAO( void )
 		-tet_r[0][0] + tet_r[0][1], -tet_r[0][0] + tet_r[0][2], -tet_r[1][0] + tet_r[1][1], -tet_r[1][0] + tet_r[1][2], -tet_r[2][0] + tet_r[2][1], -tet_r[2][0] + tet_r[2][2] };  // v0-v1-v2 (back)
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLUT_TETRAHEDRON, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
 // Guardar identificador VAO a vector VAOId
-	//VAOId[GLUT_TETRAHEDRON] = vaoId;
-
+	tetraVAO.vaoId = vaoId;
+	tetraVAO.vboId = vboId;
+	tetraVAO.nVertexs = 12;
+	return tetraVAO;
 //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
-}
-
-void drawSolidTetrahedron()
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_TETRAHEDRON];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, 12);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-	
 }
 
 /* ---------- ICOSAHEDRON -----------------------------------------------------*/
@@ -2367,20 +2316,22 @@ void drawSolidTetrahedron()
  */
 void glutSolidIcosahedron(void)
 {
-	glutSolidIcosahedron_VAO();
-	drawSolidIcosahedron();
-	deleteVAO(GLUT_ICOSAHEDRON);
+	CVAO icosVAO = loadglutSolidIcosahedron_VAO();
+	Set_VAOList(GLUT_ICOSAHEDRON, icosVAO);
+	draw_TriVAO_Object(GLUT_ICOSAHEDRON); // drawSolidIcosahedron();
+	deleteVAOList(GLUT_ICOSAHEDRON);
 }
 /*
 * Draws a solid Icosahedron in VAO
  */
-void glutSolidIcosahedron_VAO( void )
+CVAO loadglutSolidIcosahedron_VAO( void )
 {
   int i ;
   double normal[3];
 
  // VAO
-  GLuint vaoId = 0;
+  GLuint vaoId = 0;		GLuint vboId = 0;
+  CVAO icosVAO;				icosVAO.vaoId = -1;		icosVAO.vboId = -1;	icosVAO.nVertexs = 0;
   std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
   //vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
   vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2423,23 +2374,13 @@ void glutSolidIcosahedron_VAO( void )
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLUT_ICOSAHEDRON, vertices, normals, colors, textures);
-
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	icosVAO.vaoId = vaoId;
+	icosVAO.vboId = vboId;
+	icosVAO.nVertexs = 60;
+	return icosVAO;
 //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
-}
-
-void drawSolidIcosahedron()
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_ICOSAHEDRON];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, 60);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}	
 }
 
 
@@ -2449,20 +2390,22 @@ void drawSolidIcosahedron()
  */
 void glutSolidRhombicDodecahedron(void)
 {
-	glutSolidRhombicDodecahedron_VAO();
-	drawSolidRhombicDodecahedron();
-	deleteVAO(GLUT_RHOMBICDODECAHEDRON);
+	CVAO rhombicVAO = loadglutSolidRhombicDodecahedron_VAO();
+	Set_VAOList(GLUT_RHOMBICDODECAHEDRON, rhombicVAO);
+	draw_TriVAO_Object(GLUT_RHOMBICDODECAHEDRON); // drawSolidRhombicDodecahedron();
+	deleteVAOList(GLUT_RHOMBICDODECAHEDRON);
 }
 
 /*
 * Draws a solid Rhombic Dodecahedron in VAO
  */
-void glutSolidRhombicDodecahedron_VAO( void )
+CVAO loadglutSolidRhombicDodecahedron_VAO( void )
 {
   int i ;
 
 // VAO
-  GLuint vaoId = 0;
+  GLuint vaoId = 0;		GLuint vboId = 0;
+  CVAO rhombicDodeVAO;		rhombicDodeVAO.vaoId = -1;		rhombicDodeVAO.vboId = -1;	rhombicDodeVAO.nVertexs = 0;
   std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
   //vertices.resize(0);		normals.resize(0);	colors.resize(0);	 textures.resize(0);			// Reinicialitzar vectors
   vertices.clear();		normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2520,23 +2463,14 @@ void glutSolidRhombicDodecahedron_VAO( void )
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLUT_RHOMBICDODECAHEDRON, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+	rhombicDodeVAO.vaoId = vaoId;
+	rhombicDodeVAO.vboId = vboId;
+	rhombicDodeVAO.nVertexs = (int) nv/3;
 
+	return rhombicDodeVAO;
 //---- DEFINICIÓ COORDENADES TEXTURA
   //Desactiva_Coordenades_Textura();
-}
-
-void drawSolidRhombicDodecahedron()
-{
-	GLuint vaoId = 0;
-// Recuperar identificador VAO a vector VAOId
-	vaoId=VAOId[GLUT_RHOMBICDODECAHEDRON];
-	if (vaoId != -1)	{	glBindVertexArray(vaoId);
-							//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-							glDrawArrays(GL_TRIANGLES, 0, 96);
-							//glBindBuffer(GL_ARRAY_BUFFER, 0);
-							glBindVertexArray(0);
-						}
 }
 
 
@@ -2546,21 +2480,23 @@ void drawSolidRhombicDodecahedron()
  */
 void glutSolidSierpinskiSponge(int num_levels, GLdouble offset[3], GLdouble scale)
 {
-	GLint nvert;
 
-	nvert = glutSolidSierpinskiSponge_VAO(num_levels, offset, scale);
-	drawSolidSierpinskiSponge(nvert);
-	deleteVAO(GLUT_SIERPINSKISPONGE);
+	CVAO SierSpongeVAO = loadglutSolidSierpinskiSponge_VAO(num_levels, offset, scale);
+	Set_VAOList(GLUT_SIERPINSKISPONGE, SierSpongeVAO);
+	draw_TriVAO_Object(GLUT_SIERPINSKISPONGE); // drawSolidSierpinskiSponge(nvert);
+	deleteVAOList(GLUT_SIERPINSKISPONGE);
 }
 
 
 /*
 * Draws a solid Sierpinski Sponge in VAO
 */
-GLint glutSolidSierpinskiSponge_VAO(int num_levels, GLdouble offset[3], GLdouble scale)
+CVAO loadglutSolidSierpinskiSponge_VAO(int num_levels, GLdouble offset[3], GLdouble scale)
 {
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;	GLuint vboId = 0;
+	CVAO SierpinskySpongeVAO;		
+	SierpinskySpongeVAO.vaoId = -1;		SierpinskySpongeVAO.vboId = -1;		SierpinskySpongeVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();		normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2575,9 +2511,12 @@ GLint glutSolidSierpinskiSponge_VAO(int num_levels, GLdouble offset[3], GLdouble
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLUT_SIERPINSKISPONGE, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	SierpinskySpongeVAO.vaoId = vaoId;
+	SierpinskySpongeVAO.vboId = vboId;
+	SierpinskySpongeVAO.nVertexs = int(nv / 3);
 
-	return int(nv / 3);
+	return SierpinskySpongeVAO;
 }
 
 /*
@@ -2636,22 +2575,9 @@ void glutSolidSierpinskiSpongeR(int num_levels, GLdouble offset[3], GLdouble sca
   //Desactiva_Coordenades_Textura();
 }
 
-void drawSolidSierpinskiSponge(GLint nvert)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_SIERPINSKISPONGE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
-
 
 /* ---------- TEAPOT -----------------------------------------------------*/
-static void fghTeapot(GLint grid, GLdouble scale, GLenum type)
+CVAO fghTeapot(GLint grid, GLdouble scale, GLenum type)
 {
 	//#if defined(_WIN32_WCE)
 	int i, numV = sizeof(strip_vertices) / 4, numI = sizeof(strip_normals) / 4, vidx, nidx;
@@ -2661,7 +2587,9 @@ static void fghTeapot(GLint grid, GLdouble scale, GLenum type)
 	#endif*/
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO teapotVAO;
+	teapotVAO.vaoId = -1;	teapotVAO.vboId = -1;	teapotVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 
 	//vertices.resize(0);	normals.resize(0);		colors.resize(0);	textures.resize(0);	// Reinicialitzar vectors
@@ -2733,39 +2661,34 @@ static void fghTeapot(GLint grid, GLdouble scale, GLenum type)
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_TRIANGLES_VAO(GLUT_TEAPOT, vertices, normals, colors, textures);
-
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	teapotVAO.vaoId = vaoId;
+	teapotVAO.vboId = vboId;
+	teapotVAO.nVertexs = (int) nv / 3;
+	return teapotVAO;
 }
 
 
 /* -- TEAPOT INTERFACE FUNCTIONS -------------------------------------------------- */
 void glutSolidTeapot(GLdouble size)
-{	
-	glutSolidTeapot_VAO(size);
-	drawSolidTeapot();
-	deleteVAO(GLUT_TEAPOT);
+{
+	CVAO teapotVAO = loadglutSolidTeapot_VAO(size);
+	Set_VAOList(GLUT_TEAPOT, teapotVAO);
+	draw_TriVAO_Object(GLUT_TEAPOT); // drawSolidTeapot();
+	deleteVAOList(GLUT_TEAPOT);
 }
 
 /*
 * Renders a beautiful filled teapot...
 */
-void glutSolidTeapot_VAO(GLdouble size)
+CVAO loadglutSolidTeapot_VAO(GLdouble size)
 {
 // We will use the general teapot rendering code
-	fghTeapot(10, size, GL_FILL);
+	CVAO teapotVAO = fghTeapot(10, size, GL_FILL);
+
+	return teapotVAO;
 }
 
-
-void drawSolidTeapot()
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLUT_TEAPOT];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						glDrawArrays(GL_TRIANGLES, 0, 3276);
-						glBindVertexArray(0);
-					}
-}
 
 // ------------------- PRIMITIVES GLU (CYLINDER, DISC, SPHERE) -------------------------
 /* Make it not a power of two to avoid cache thrashing on the chip */
@@ -2775,12 +2698,13 @@ void drawSolidTeapot()
 // --- CILINDRE
 
 void gluCylinder(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks)
-{	int nvertexs = gluCylinder_VAO(baseRadius, topRadius, height, slices, stacks);
-	drawgluCylinder(nvertexs);
-	deleteVAO(GLU_CYLINDER);
+{	CVAO cilindreVAO = loadgluCylinder_VAO(baseRadius, topRadius, height, slices, stacks);
+	Set_VAOList(GLU_CYLINDER, cilindreVAO);
+	draw_TriVAO_Object(GLU_CYLINDER); //drawgluCylinder(nvertexs);
+	deleteVAOList(GLU_CYLINDER);
 }
 
-GLint gluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks)
+CVAO loadgluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks)
 {
 	GLint i, j;
 	GLfloat sinCache[CACHE_SIZE];
@@ -2797,7 +2721,9 @@ GLint gluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, 
 	int needCache2, needCache3;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO cilindreVAO;
+	cilindreVAO.vaoId = -1;		cilindreVAO.vboId = -1;		cilindreVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2809,12 +2735,12 @@ GLint gluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, 
 	if (slices >= CACHE_SIZE) slices = CACHE_SIZE - 1;
 
 	if (slices < 2 || stacks < 1 || baseRadius < 0.0 || topRadius < 0.0 ||
-		height < 0.0)	return 0;
+		height < 0.0)	return cilindreVAO;
 
 // Compute length (needed for normal calculations)
 	deltaRadius = baseRadius - topRadius;
 	length = sqrt(deltaRadius*deltaRadius + height*height);
-	if (length == 0.0) return 0;
+	if (length == 0.0) return cilindreVAO;
 
 // Cache2 is the various normals at the vertices themselves
 	needCache2 = needCache3 = 0;
@@ -2901,59 +2827,40 @@ GLint gluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, 
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLU_CYLINDER, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+	cilindreVAO.vaoId = vaoId;
+	cilindreVAO.vboId = vboId;
+	cilindreVAO.nVertexs = (int) nv / 3;
 
-	return int(nv / 3);
+	return cilindreVAO;
 }
 
-void drawgluCylinder(GLint nvert)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLU_CYLINDER];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 // --- DISC
 void gluDisk(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops)
 {
-	GLint nvertexs = gluDisk_VAO(innerRadius, outerRadius, slices, loops);
-	drawgluDisk(nvertexs);
-	deleteVAO(GLU_DISK);
+	CVAO diskVAO = loadgluDisk_VAO(innerRadius, outerRadius, slices, loops);
+	Set_VAOList(GLU_DISK, diskVAO);
+	draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertexs);
+	deleteVAOList(GLU_DISK);
 }
 
-GLint gluDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops)
-{	GLint nvertexs = gluPartialDisk_VAO(innerRadius, outerRadius, slices, loops, 0.0, 360.0,GLU_DISK);
-	return nvertexs;
-}
-
-void drawgluDisk(GLint nvert)
-{	GLuint vaoId = 0;
-
-	// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLU_DISK];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
+CVAO loadgluDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops)
+{
+	CVAO diskVAO = loadgluPartialDisk_VAO(innerRadius, outerRadius, slices, loops, 0.0, 360.0);
+	return diskVAO;
 }
 
 // --- PARCIAL DISC
-
-void gluPartialDisk(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle)
-{	GLint nvertexs = gluPartialDisk_VAO(innerRadius, outerRadius, slices, loops, startAngle, sweepAngle, GLU_PARTIALDISK);
-	drawgluPartialDisk(nvertexs);
-	deleteVAO(GLU_PARTIALDISK);
+void loadgluPartialDisk(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle,GLint index)
+{
+	CVAO partialDiskVAO = loadgluPartialDisk_VAO(innerRadius, outerRadius, slices, loops, startAngle, sweepAngle);
+	Set_VAOList(GLU_PARTIALDISK, partialDiskVAO);
+	draw_TriVAO_Object(GLU_PARTIALDISK); // drawgluPartialDisk(nvertexs);
+	deleteVAOList(GLU_PARTIALDISK);
 }
 
-GLint gluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle,GLint index)
+CVAO loadgluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle)
 {
 	GLint i, j;
 	GLdouble sinCache[CACHE_SIZE];
@@ -2967,7 +2874,9 @@ GLint gluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slice
 	GLint finish;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO diskVAO;
+	diskVAO.vaoId = -1;	diskVAO.vboId = -1;	diskVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -2977,7 +2886,7 @@ GLint gluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slice
 	//glGetDoublev(GL_CURRENT_COLOR, cColor);
 
 	if (slices >= CACHE_SIZE) slices = CACHE_SIZE - 1;
-	if (slices < 2 || loops < 1 || outerRadius <= 0.0 || innerRadius < 0.0 || innerRadius > outerRadius) return 0;
+	if (slices < 2 || loops < 1 || outerRadius <= 0.0 || innerRadius < 0.0 || innerRadius > outerRadius) return diskVAO;
 	if (sweepAngle < -360.0) sweepAngle = 360.0;
 	if (sweepAngle > 360.0) sweepAngle = 360.0;
 	if (sweepAngle < 0) {	startAngle += sweepAngle;
@@ -3114,34 +3023,27 @@ GLint gluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slice
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLU_PARTIALDISK, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	diskVAO.vaoId = vaoId;
+	diskVAO.vboId = vboId;
+	diskVAO.nVertexs = (int)nv / 3;
 
-	return int(nv / 3);
+	return diskVAO;
 }
 
-void drawgluPartialDisk(GLint nvert)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLU_PARTIALDISK];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 // --- ESFERA : Texturització compatible amb superficie planetes
 void gluSphere(GLdouble radius, GLint slices, GLint stacks)
-{	int nvertexs = gluSphere_VAO(radius, slices, stacks);
-	drawgluSphere(nvertexs);
-	deleteVAO(GLU_SPHERE);
+{	
+	CVAO sphereVAO = loadgluSphere_VAO(radius, slices, stacks);
+	Set_VAOList(GLU_SPHERE, sphereVAO);
+	draw_TriVAO_Object(GLU_SPHERE); // drawgluSphere(nvertexs);
+	deleteVAOList(GLU_SPHERE);
 }
 
 
-GLint gluSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
-{
+CVAO loadgluSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
+{	
 	GLint i, j;
 	GLfloat sinCache1a[CACHE_SIZE];
 	GLfloat cosCache1a[CACHE_SIZE];
@@ -3159,7 +3061,9 @@ GLint gluSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
 	GLint start, finish;
 
 // VAO
-	GLuint vaoId = 0;
+	CVAO auxVAO;
+	auxVAO.vaoId = -1;		auxVAO.vboId = -1;	auxVAO.nVertexs = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 	vertices.clear();			normals.clear();		colors.clear();		textures.clear();			// Reinicialitzar vectors
@@ -3170,7 +3074,7 @@ GLint gluSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
 
 	if (slices >= CACHE_SIZE) slices = CACHE_SIZE - 1;
 	if (stacks >= CACHE_SIZE) stacks = CACHE_SIZE - 1;
-	if (slices < 2 || stacks < 1 || radius < 0.0) return 0;
+	if (slices < 2 || stacks < 1 || radius < 0.0) return auxVAO;
 
 // Cache2 is the various normals at the vertices themselves 
 	needCache2 = GL_TRUE;
@@ -3283,21 +3187,14 @@ GLint gluSphere_VAO(GLdouble radius, GLint slices, GLint stacks)
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
 // Creació d'un VAO i un VBO i càrrega de la geometria. Guardar identificador VAO a vector VAOId i identificador VBO a vector VBOId.
-	vaoId = load_TRIANGLES_VAO(GLU_SPHERE, vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures,vboId);
+	auxVAO.vaoId = vaoId;
+	auxVAO.vboId = vboId;
+	auxVAO.nVertexs = (int)nv / 3;
 
-	return int(nv / 3);
+	return auxVAO;
 }
 
-void drawgluSphere(GLint nvert)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[GLU_SPHERE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						glDrawArrays(GL_TRIANGLES, 0, nvert);
-						glBindVertexArray(0);
-					}
-}
 // ------------------- FI PRIMITIVES GLU (CYLINDER, DISC, SPHERE) -------------------------
 
 //------------------------------- DIBUIX DE CORBES i SUPERFICIES --------------------------------
@@ -3428,12 +3325,11 @@ void dibuixa_Triedre_Frenet(GLuint sh_programID, CPunt3D vertex, CPunt3D VT, CPu
 	colors.push_back(0.0);			colors.push_back(1.0);			colors.push_back(1.0);		colors.push_back(1.0);
 	vertices.push_back(vertex.x + incr * VT.x);	vertices.push_back(vertex.y + incr * VT.y);	vertices.push_back(vertex.z + incr * VT.z);
 	//	glEnd();
+	draw_GL_LINES_VAO(vertices, colors);
 
 // ----------------------- VAO
-	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
+	//std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 	// std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
-
-	draw_GL_LINES_VAO(vertices, colors);
 
 // Restaurar el gruix de la linia dels eixos
 	glLineWidth(1.0);
@@ -3443,14 +3339,15 @@ void dibuixa_Triedre_Frenet(GLuint sh_programID, CPunt3D vertex, CPunt3D VT, CPu
 //----------------------------  POLYLINE (Interpolació linial entre punts de control)
 void draw_PolyLine(CPunt3D* ctr_points, int nptsPolyLine, float pas)
 {
-	int npunts = draw_PolyLine_VAO(ctr_points, nptsPolyLine, pas);
-	drawCRVPolyLine(npunts);
-	deleteVAO(CRV_POLYLINE);
+	CVAO polyVAO= load_PolyLine_VAO(ctr_points, nptsPolyLine, pas);
+	Set_VAOList(CRV_POLYLINE, polyVAO);
+	draw_LinVAO_Object(CRV_POLYLINE); // drawCRVPolyLine(npunts);
+	deleteVAOList(CRV_POLYLINE);
 }
 
 
 //void draw_PolyLine(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsPolyLine, float pas, bool TFrenet)
-int draw_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas)
+CVAO load_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas)
 {
 	CPunt3D vertexL1, vertexL2;
 	CPunt3D ctr[3];		// Punts control del patch de la línia.
@@ -3458,7 +3355,8 @@ int draw_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas)
 	GLfloat t = 0;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO polyVAO;		polyVAO.vaoId = -1;		polyVAO.vboId = -1;		polyVAO.nVertexs = 0;
 	std::vector <double> vertices, colors;		// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		colors.resize(0);	// Reinicialitzar vectors
 	vertices.clear();			colors.clear();		// Reinicialitzar vectors
@@ -3555,99 +3453,18 @@ int draw_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas)
 	}
 	//glEnd();
 
-/*
-// Càlcul i dibuix Triedre de Frenet en cada vèrtex de la Polyline
-	if (TFrenet) {
-		t = 0;	patch = 0;
-		// Càrrega primers punts de control.
-		for (int i = 0; i < 3; i++)
-		{	ctr[i].x = ctr_points[i].x;
-			ctr[i].y = ctr_points[i].y;
-			ctr[i].z = ctr_points[i].z;
-		}
-		vertexL1 = Punt_PolyLine(t, ctr);
-		// Càlcul i dibuix Triedre de Frenet en vertexL1	
-		VT = VT_PolyLine(ctr);
-		VBN = VBN_PolyLine(ctr);
-		VNP = VNP_PolyLine(VBN, VT);
-		dibuixa_Triedre_Frenet(vertexL1, VT, VNP, VBN,vertices, colors);
-		t = t + pas;
-		while (patch <= nptsPolyLine - 2) {
-			if (t >= 1.0)
-			{	vertexL2 = Punt_PolyLine(1.0, ctr);
-				// Dibuix en vertexL2 del Triedre de Frenet calculat al principi de la recta
-				//dibuixa_TriedreFrenet(vertexL2, VT, VNP, VBN);
-				t = 0.0;
-				patch++;
-				if (patch <= nptsPolyLine - 2)
-				{	if (patch < nptsPolyLine - 2)
-					{	for (int i = 0; i < 3; i++)
-						{	ctr[i].x = ctr_points[patch + i].x;
-							ctr[i].y = ctr_points[patch + i].y;
-							ctr[i].z = ctr_points[patch + i].z;
-						}
-					}
-					else {
-						for (int i = 0; i < 2; i++)
-						{
-							ctr[i].x = ctr_points[patch + i].x;
-							ctr[i].y = ctr_points[patch + i].y;
-							ctr[i].z = ctr_points[patch + i].z;
-						}
-						// Si cadena de punts Tancat (primer punt [0] igual a últim[nptsPolyLine]), agafar punt [1]
-						if ((ctr[1].x == ctr[2].x) && (ctr[1].y = ctr[2].y) && (ctr[1].z == ctr[2].z))
-						{
-							ctr[2].x = ctr_points[1].x;
-							ctr[2].y = ctr_points[1].y;
-							ctr[2].z = ctr_points[1].z;
-						}
-						// Si cadena de punts no Tancada, agafar primer punt com a últim
-						else {	ctr[2].x = ctr_points[0].x;
-								ctr[2].y = ctr_points[0].y;
-								ctr[2].z = ctr_points[0].z;
-							}
-					}
-				}
-				vertexL1 = Punt_PolyLine(t, ctr);
-				// Càlcul i dibuix Triedre de Frenet en vertexL1 (primer vèrtex del patch de línia)	
-				VT = VT_PolyLine(ctr);
-				VBN = VBN_PolyLine(ctr);
-				VNP = VNP_PolyLine(VBN, VT);
-				dibuixa_Triedre_Frenet(vertexL1, VT, VNP, VBN,vertices,colors);
-			}
-			else if (patch <= nptsPolyLine - 2) {
-				vertexL2 = Punt_PolyLine(t, ctr);
-				// Dibuix en vertexL2 del Triedre de Frenet calculat al principi de la recta
-				dibuixa_Triedre_Frenet(vertexL2, VT, VNP, VBN);
-				//				vertexL1 = vertexL2;
-				t = t + pas;
-			}
-		}
-	}
-*/
-
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 	//std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
 
-	vaoId = load_LINES_VAO(vertices, colors);
-	VAOId[CRV_POLYLINE] = vaoId;
+	vaoId = load_LINES_VAO(vertices, colors,vboId);
+	polyVAO.vaoId = vaoId;
+	polyVAO.vboId = vboId;
+	polyVAO.nVertexs = int(nv / 3);
 
-	return int(nv / 2);
+	return polyVAO;
 }
 
-void drawCRVPolyLine(GLint npunts)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[CRV_POLYLINE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_LINES, 0, npunts);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 // draw_TFPolyLine: Visualització del Triedre de Frenet del PolyLine de cada vèrtex del polyLine
 //					donada la seqüència de punts 
@@ -3726,8 +3543,6 @@ void draw_TFPolyLine(GLuint sh_programID, CPunt3D* ctr_points, int nptsPolyLine,
 			t = t + pas;
 			}
 	}
-
-
 }
 
 // Punt_Polyline: Calcul del punt del Polyline en coordenades 3D (CPunt3D) segons el 
@@ -3842,18 +3657,20 @@ CPunt3D VNP_PolyLine(CPunt3D VBN, CPunt3D VT)
 //----------------------------  CORBA LEMNISCATA 2D
 void draw_Lemniscata2D(float escala, float pas)
 {
-	int npunts = draw_Lemniscata2D_VAO(escala, pas);
-	drawCRVLemniscata2D(npunts);
-	deleteVAO(CRV_LEMNISCATA2D);
+	CVAO lemniVAO = load_Lemniscata2D_VAO(escala, pas);
+	Set_VAOList(CRV_LEMNISCATA2D, lemniVAO);
+	draw_LinVAO_Object(CRV_LEMNISCATA2D); //drawCRVLemniscata2D(npunts);
+	deleteVAOList(CRV_LEMNISCATA2D);
 }
 
-GLint draw_Lemniscata2D_VAO(float escala, float pas)
+CVAO load_Lemniscata2D_VAO(float escala, float pas)
 {
 	float t = 0;
 	CPunt3D vertexL1, vertexL2;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO lemniVAO;		lemniVAO.vaoId = -1;	lemniVAO.vboId = -1;	lemniVAO.nVertexs = 0;
 	std::vector <double> vertices, colors;		// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		colors.resize(0);	// Reinicialitzar vectors
 	vertices.clear();			colors.clear();		// Reinicialitzar vectors
@@ -3862,7 +3679,7 @@ GLint draw_Lemniscata2D_VAO(float escala, float pas)
 	//GLfloat cColor[4];
 	//glGetFloatv(GL_CURRENT_COLOR, cColor);
 
-	if (pas == 0) return 0;
+	if (pas == 0) return lemniVAO;
 	else {
 		vertexL1 = Punt_Lemniscata2D(t, escala);
 		t = t + pas;
@@ -3885,26 +3702,14 @@ GLint draw_Lemniscata2D_VAO(float escala, float pas)
 // ----------------------- VAO
 		std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-		vaoId = load_LINES_VAO(vertices, colors);
-		VAOId[CRV_LEMNISCATA2D] = vaoId;
+		vaoId = load_LINES_VAO(vertices, colors,vboId);
+		lemniVAO.vaoId = vaoId;
+		lemniVAO.vboId = vboId;
+		lemniVAO.nVertexs = int(nv / 2);
 
-		return int(nv / 2);
+		return lemniVAO;
 	}
 }
-
-void drawCRVLemniscata2D(GLint npunts)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[CRV_LEMNISCATA2D];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_LINES, 0, npunts);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
-
 
 
 // draw_TFLemniscata2D: Visualització del Triedre de Frenet de la corba de lemniscata 2D donada l'escala, 
@@ -4049,17 +3854,19 @@ CPunt3D VBN_Lemniscata2D(float t, float scale)
 //----------------------------  CORBA LEMNISCATA 3D
 void draw_Lemniscata3D(float escala, float pas)
 {
-	int npunts = draw_Lemniscata3D_VAO(escala, pas);
-	drawCRVLemniscata3D(npunts);
-	deleteVAO(CRV_LEMNISCATA3D);
+	CVAO lemniVAO = load_Lemniscata3D_VAO(escala, pas);
+	Set_VAOList(CRV_LEMNISCATA3D,lemniVAO);
+	draw_LinVAO_Object(CRV_LEMNISCATA3D); // drawCRVLemniscata3D(npunts);
+	deleteVAOList(CRV_LEMNISCATA3D);
 }
 
-// draw_Lemniscata3D: Visualització de la corba de lemniscata 3D donada l'escala, 
+// load_Lemniscata3D: Càrrega en VAO de la corba de lemniscata 3D donada l'escala, 
 //             amb increment pas i si volem visualtzar el Triedre de Frenet 
-GLint draw_Lemniscata3D_VAO(float escala, float pas)
+CVAO load_Lemniscata3D_VAO(float escala, float pas)
 {
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;	GLuint vboId = 0;
+	CVAO lemniVAO;		lemniVAO.vaoId = -1;		lemniVAO.vboId = -1;	lemniVAO.nVertexs = 0;
 	std::vector <double> vertices, colors;		// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		colors.resize(0);	// Reinicialitzar vectors
 	vertices.clear();			colors.clear();		// Reinicialitzar vectors
@@ -4070,7 +3877,7 @@ GLint draw_Lemniscata3D_VAO(float escala, float pas)
 
 	float t = 0;
 	CPunt3D vertexL1, vertexL2;
-	if (pas == 0) return 0;
+	if (pas == 0) return lemniVAO;
 	else {
 		vertexL1 = Punt_Lemniscata3D(t, escala);
 		t = t + pas;
@@ -4093,25 +3900,14 @@ GLint draw_Lemniscata3D_VAO(float escala, float pas)
 // ----------------------- VAO
 		std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-		vaoId = load_LINES_VAO(vertices, colors);
-		VAOId[CRV_LEMNISCATA3D] = vaoId;
+		vaoId = load_LINES_VAO(vertices, colors,vboId);
+		lemniVAO.vaoId = vaoId;
+		lemniVAO.vboId = vboId;
+		lemniVAO.nVertexs = int(nv / 3);
 		
-		return int(nv / 3);
+		return lemniVAO;
 	}
 
-}
-
-void drawCRVLemniscata3D(GLint npunts)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[CRV_LEMNISCATA3D];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_LINES, 0, npunts);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
 }
 
 
@@ -4272,15 +4068,16 @@ CPunt3D VBN_Lemniscata3D(float t, float scale)
 //----------------------------  FI CORBA LEMNISCATA 3D
 
 //----------------------------  CORBA B-SPLINE
-void draw_BSpline_Curve(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas)
-{	int npunts = draw_BSpline_Curve_VAO(ctr_points, nptsCorba, pas);
-	drawCRVBSpline(npunts);
-	deleteVAO(CRV_BSPLINE);
+void draw_BSpline_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas)
+{	CVAO BSplineVAO = load_BSpline_Curve_VAO(nptsCorba, ctr_points,  pas);
+	Set_VAOList(CRV_BSPLINE, BSplineVAO);
+	draw_LinVAO_Object(CRV_BSPLINE); //drawCRVBSpline(npunts);
+	deleteVAOList(CRV_BSPLINE);
 }
 
 // draw_BSpline_Curve_VAO: Visualització de la corba de B-Spline donada per nptsCorba punts de control definits en ctr_points, 
 //             amb increment pas
-int draw_BSpline_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas)
+CVAO load_BSpline_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas)
 {
 	CPunt3D vertexL1, vertexL2;
 	CPunt3D ctr[4];		// Punts control del patch de l'spline.
@@ -4288,7 +4085,9 @@ int draw_BSpline_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, f
 	GLfloat t = 0;
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;			GLuint vboId = 0;
+	CVAO BSplineVAO;		BSplineVAO.vaoId = -1;		BSplineVAO.vboId = -1;		BSplineVAO.nVertexs = 0;
+
 	std::vector <double> vertices, colors;		// Definició vectors dinàmics per a vertexs, normals i textures 
 	//vertices.resize(0);		colors.resize(0);	// Reinicialitzar vectors
 	vertices.clear();			colors.clear();		// Reinicialitzar vectors
@@ -4341,24 +4140,14 @@ int draw_BSpline_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, f
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_LINES_VAO(vertices, colors);
-	VAOId[CRV_BSPLINE] = vaoId;
+	vaoId = load_LINES_VAO(vertices, colors,vboId);
+	BSplineVAO.vaoId = vaoId;
+	BSplineVAO.vboId = vboId;
+	BSplineVAO.nVertexs = int(nv / 3);
 
-	return int(nv / 3);
+	return BSplineVAO;
 }
 
-void drawCRVBSpline(GLint npunts)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[CRV_BSPLINE];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						//glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_LINES, 0, npunts);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 // draw_TFBSpline_Curve: Visualització del Triedre de Drenet de la corba de B-Spline donada per nptsCorba punts de control definits en ctr_points, 
 //             amb increment pas.
@@ -4511,7 +4300,6 @@ CPunt3D D2_BSpline_Curve(float t, CPunt3D* ctr)
 }
 
 //-- TRIEDRE DE FRENET PER A CORBES SPLINE
-
 // VT_BSpline_Curve: Calcul del Vector Tangent (primera derivada) del B-Spline en coordenades 3D (CPunt3D) segons el 
 //             paràmetre t i els punts de control ctr. Normalitzat.
 CPunt3D VT_BSpline_Curve(float t, CPunt3D* ctr)
@@ -4554,33 +4342,46 @@ CPunt3D VBN_BSpline_Curve(float t, CPunt3D* ctr)
 //----------------------------  FI CORBA B-SPLINE
 
 //----------------------------  CORBA BEZIER
-
 // draw_Bezier_Curve: Visualització de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
 //             amb increment pas, corba tancada o no i si volem visualtzar el Triedre de Frenet 
-void draw_Bezier_Curve(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas, bool tancat)
+void draw_Bezier_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas, bool tancat)
 {
-	int npunts = draw_Bezier_Curve_VAO(ctr_points, nptsCorba, pas, tancat);
-	drawCRVBezier(npunts);
-	deleteVAO(CRV_BEZIER);
+	CVAO BezierVAO = load_Bezier_Curve_VAO(nptsCorba, ctr_points,  pas, tancat);
+	Set_VAOList(CRV_BEZIER, BezierVAO);
+	draw_LinVAO_Object(CRV_BEZIER); // drawCRVBezier(npunts);
+	deleteVAOList(CRV_BEZIER);
 }
 
-// draw_Bezier_Curve_VAO: Càrrega dels punts de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
+// load_Bezier_Curve_VAO: Càrrega en VAO dels punts de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
 //             amb increment pas, corba tancada o no i si volem visualtzar el Triedre de Frenet 
-GLint draw_Bezier_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas, bool tancat)
+CVAO load_Bezier_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas, bool tancat)
 {
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
+	CVAO BezierVAO;		BezierVAO.vaoId = -1;	BezierVAO.vboId = -1;		BezierVAO.nVertexs = 0;
 	std::vector <double> vertices, colors;		// Definició vectors dinàmics per a vertexs, normals i textures 
 	vertices.resize(0);		colors.resize(0);	// Reinicialitzar vectors
 
 // Obtenir color actual definit en OpenGL amb glColor();
 	//GLfloat cColor[4];
 	//glGetFloatv(GL_CURRENT_COLOR, cColor);
-
+	int i=0, npuntsCorba = nptsCorba;
+	CPunt3D ctrl_points[MAX_PATCH_CORBA];
 	CPunt3D vertexL1, vertexL2;
 	CPunt3D ctr[4];		// Punts control del patch de l'spline.
 	int patch = 0;			// Patch actual.
 	GLfloat t = 0;
+
+	if (tancat && npuntsCorba + 3 < MAX_PATCH_CORBA)
+	{	for (i=0; i < nptsCorba ; i++) ctrl_points[i] = ctr_points[i];
+	i = nptsCorba;
+		ctrl_points[i] = ctr_points[0];
+		ctrl_points[i + 1] = ctr_points[1];
+		ctrl_points[i + 2] = ctr_points[2];
+		npuntsCorba = nptsCorba + 3;
+	}
+	else { for (i = 0; i < nptsCorba; i++) ctrl_points[i] = ctr_points[i];
+		}
 
 	//t = t - pas;
 // Càrrega primers punts de control.
@@ -4592,21 +4393,25 @@ GLint draw_Bezier_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, 
 	//glBegin(GL_LINES);
 	vertexL1 = Punt_Bezier_Curve(t, ctr);
 	t = t + pas;
-	while (patch <= nptsCorba - 4){
+//	while (patch <= nptsCorba - 4){
+	while (patch <= npuntsCorba - 4) {
 		if (t > 1.0 + 2 * pas)	{
 			t -= 1.0;
 			//patch++;
 			patch = patch + 3;
-			if ((patch < nptsCorba - 1) && (patch + 4 > nptsCorba)) patch = nptsCorba - 4;
-			if (patch <= nptsCorba - 4)
+//			if ((patch < nptsCorba - 1) && (patch + 4 > nptsCorba)) patch = nptsCorba - 4;
+			if ((patch < npuntsCorba - 1) && (patch + 4 > npuntsCorba)) patch = npuntsCorba - 4;
+			//if (patch <= nptsCorba - 4)
+			if (patch <= npuntsCorba - 4)
 			{	for (int i = 0; i < 4; i++)
-				{	ctr[i].x = ctr_points[patch + i].x;
-					ctr[i].y = ctr_points[patch + i].y;
-					ctr[i].z = ctr_points[patch + i].z;
+				{	ctr[i].x = ctrl_points[patch + i].x;	// ctr[i].x = ctr_points[patch + i].x;
+					ctr[i].y = ctrl_points[patch + i].y;	// ctr[i].y = ctr_points[patch + i].y;
+					ctr[i].z = ctrl_points[patch + i].z;	// ctr[i].z = ctr_points[patch + i].z;
 				}
 			}
 		}
-		if (patch <= nptsCorba - 4) {
+		//if (patch <= nptsCorba - 4) {
+		if (patch <= npuntsCorba - 4) {
 			if (t>1.0) vertexL2 = Punt_Bezier_Curve(1.0, ctr);
 			else vertexL2 = Punt_Bezier_Curve(t, ctr);
 			//glVertex3f(vertexL1.x, vertexL1.y, vertexL1.z);	// Vértex 1 de la línia
@@ -4626,24 +4431,14 @@ GLint draw_Bezier_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, 
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_LINES_VAO(vertices, colors);
-	VAOId[CRV_BEZIER]=vaoId;
+	vaoId = load_LINES_VAO(vertices, colors,vboId);
+	BezierVAO.vaoId = vaoId;
+	BezierVAO.vboId = vboId;
+	BezierVAO.nVertexs = int(nv / 3);
 	
-	return int(nv / 2);
+	return BezierVAO;
 }
 
-void drawCRVBezier(GLint npunts)
-{	GLuint vaoId = 0;
-
-// Recuperar identificador VAO a vector VAOId
-	vaoId = VAOId[CRV_BEZIER];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						// glBindBuffer(GL_ARRAY_BUFFER, vboId);
-						glDrawArrays(GL_LINES, 0, npunts);
-						//glBindBuffer(GL_ARRAY_BUFFER, 0);
-						glBindVertexArray(0);
-					}
-}
 
 // draw_TFBezier_Curve: Visualització del Triedre de Drenet de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
 //             amb increment pas, corba tancada o no i si volem visualtzar el Triedre de Frenet 
@@ -4785,7 +4580,6 @@ CPunt3D D2_Bezier_Curve(float t, CPunt3D* ctr)
 }
 
 //-- TRIEDRE DE FRENET PER A CORBES BEZIER
-
 // VT_Bezier_Curve: Calcul del Vector Tangent (primera derivada) de la corba Bezier en coordenades 3D (CPunt3D) segons el 
 //             paràmetre i els punts de control ctr. Normalitzat.
 CPunt3D VT_Bezier_Curve(float t, CPunt3D* ctr)
@@ -4831,7 +4625,7 @@ CPunt3D VBN_Bezier_Curve(float t, CPunt3D* ctr)
 
 // ------------------------- ACTIVACIÓ VERTEX ARRAY DE CADA FORMA GL_* PER A VBO i VAO---------------------------
 // ------------------------------------------ (LINES, TRIANGLES) ------------------------------------------------
-GLint load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors)
+GLint load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors, GLuint& vboID)
 {
 	GLuint vaoId = 0, vboId = 0;
 // ----------------------- VAO
@@ -4872,29 +4666,24 @@ GLint load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors)
 // Unbind VAO, to prevent bugs
 	glBindVertexArray(0);
 
-// Assignació identificadors VBO a vector VBOId
-	VBOId[GLUT_LINES] = vboId;
-
-// Assignació identificadors VAO a vector VAOId
-	VAOId[GLUT_LINES] = vaoId;
-
-	return vaoId;
+	vboID = vboId;  // Retorna identificador VBO.
+	return vaoId;	// Retorna identificador VAO
 }
 
 void draw_LINES_VAO(int nvert, GLint vaoId)
 {
-//	GLuint vaoId = 0;
+	//	GLuint vaoId = 0;
 
-// Recuperar identificador VAO a vector VAOId
-//	vaoId = VAOId[GLUT_LINES];
-	if (vaoId != -1) {	glBindVertexArray(vaoId);
-						glDrawArrays(GL_LINES, 0, nvert);
-						glBindVertexArray(0);
+	// Recuperar identificador VAO a vector VAOId
+	//	vaoId = VAOId[GLUT_LINES];
+	if (vaoId != -1) {
+		glBindVertexArray(vaoId);
+		glDrawArrays(GL_LINES, 0, nvert);
+		glBindVertexArray(0);
 	}
 }
 
-
-GLint load_TRIANGLES_VAO(int prim_Id, std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures)
+GLint load_TRIANGLES_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures, GLuint &vboID)
 {
 	GLuint vaoId=0, vboId = 0;
 
@@ -4950,18 +4739,14 @@ GLint load_TRIANGLES_VAO(int prim_Id, std::vector <double> vertices, std::vector
 // Unbind VAO, to prevent bugs
 	glBindVertexArray(0);
 
-// Assignació identificadors VBO a vector VBOId
-	VBOId[prim_Id] = vboId;
-
-// Assignació identificadors VAO a vector VAOId
-	VAOId[prim_Id] = vaoId;
-
-	return vaoId;
+	vboID = vboId;  // Retorna identificador VBO.
+	return vaoId;	// Retorna identificador VAO
 }
 
-void draw_TRIANGLES_VAO(GLint vaoId, int nvert)
+void draw_TRIANGLES_VAO(GLint vaoList_indx)
 {
-//	GLuint vaoId = 0;
+	GLuint vaoId = VAOList[vaoList_indx].vaoId;
+	int nvert = VAOList[vaoList_indx].nVertexs;
 
 // Recuperar identificador VAO a vector VAOId
 //	vaoId = VAOId[GLUT_TRIANGLES];
@@ -5012,267 +4797,6 @@ void draw_GL_LINES_VAO(std::vector <double> vertices, std::vector <double> color
 // Dissable Attrib arrays
 	glDisableVertexAttribArray(0);		// Disable attribute index 0 as being used (Position)
 	glDisableVertexAttribArray(1);		// Disable attribute index 1 as being used (Color)
-
-// It is good idea to release VBOs with ID 0 after use.
-// Once bound with 0, all pointers in gl*Pointer() behave as real
-// pointer, so, normal vertex array operations are re-activated
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vboId);
-
-// Unbind and delete VAO
-	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &vaoId);
-}
-
-
-// ACTIVACIÓ VERTEX ARRAY DE GL_POLYGON PER A VAO
-void draw_GL_POLYGON_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures)
-{
-// ----------------------- VAO, VBO
-	GLuint vaoId = 0, vboId = 0;
-	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
-	//std::vector <int>::size_type nn = normals.size();	// Tamany del vector normals en elements.
-	//std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
-	//std::vector <int>::size_type nt = textures.size();// Tamany del vector textures en elements.
-
-// Create Vertex Array Object (VAO) for 3D Model Cube
-	glGenVertexArrays(1, &vaoId);
-
-// Create vertex buffer objects for 3D Model attributes in the VAO
-	glGenBuffers(1, &vboId);
-
-// Bind our Vertex Array Object as the current used object
-	glBindVertexArray(vaoId);
-
-// Bind our Vertex Buffer Object as the current used object
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size() + colors.size()) * sizeof(double), 0, GL_STATIC_DRAW);
-
-// Position Vertex attributes
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(double), &vertices[0]);	// Copy geometry data to VBO starting from 0 offest
-	glEnableVertexAttribArray(0);											// Enable attribute index 0 as being used (position)
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);	// Specify that our coordinate data is going into attribute index 0 and contains 3 double
-
-// Normal Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(double), normals.size() * sizeof(double), &normals[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(1);											// Enable attribute index 1 as being used (normals)
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), (GLvoid*)(vertices.size() * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Texture Coordinates Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size()) * sizeof(double), textures.size() * sizeof(double), &textures[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(2);												// Enable attribute index 2 as being used (texture coordinates)
-	glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (GLvoid*)((vertices.size() + normals.size()) * sizeof(double)));						// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Color Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size()) * sizeof(double), colors.size() * sizeof(double), &colors[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(3);												// Enable attribute index 3 as being used
-	glVertexAttribPointer(3, 4, GL_DOUBLE, GL_FALSE, 4 * sizeof(double), (GLvoid*)((vertices.size() + normals.size() + textures.size()) * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Draw Primitive
-	glDrawArrays(GL_POLYGON, 0, (int) nv / 3);
-
-// Dissable Attrib arrays
-	glDisableVertexAttribArray(0);			// Disable attribute index 0 as being used (Position)
-	glDisableVertexAttribArray(1);			// Disable attribute index 1 as being used (Normal)
-	glDisableVertexAttribArray(2);			// Disable attribute index 2 as being used (Texture Coordinates)
-	glDisableVertexAttribArray(3);			// Disable attribute index 3 as being used (Color)
-
-// It is good idea to release VBOs with ID 0 after use.
-// Once bound with 0, all pointers in gl*Pointer() behave as real
-// pointer, so, normal vertex array operations are re-activated
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vboId);
-
-// Unbind and delete VAO
-	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &vaoId);
-
-}
-
-// ACTIVACIÓ VERTEX ARRAY DE GL_QUADS PER A VAO
-void draw_GL_QUADS_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures)
-{
-// ----------------------- VAO, VBO
-	GLuint vaoId = 0, vboId = 0;
-	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
-	//std::vector <int>::size_type nn = normals.size();	// Tamany del vector normals en elements.
-	//std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
-	//std::vector <int>::size_type nt = textures.size();	// Tamany del vector textures en elements.
-
-// Create Vertex Array Object (VAO) for 3D Model Cube
-	glGenVertexArrays(1, &vaoId);
-
-// Create vertex buffer objects for 3D Model attributes in the VAO
-	glGenBuffers(1, &vboId);
-
-// Bind our Vertex Array Object as the current used object
-	glBindVertexArray(vaoId);
-
-// Bind our Vertex Buffer Object as the current used object
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size() + colors.size()) * sizeof(double), 0, GL_STATIC_DRAW);
-
-// Position Vertex attributes
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(double), &vertices[0]);	// Copy geometry data to VBO starting from 0 offest
-	glEnableVertexAttribArray(0);											// Enable attribute index 0 as being used (position)
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);	// Specify that our coordinate data is going into attribute index 0 and contains 3 double
-
-// Normal Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(double), normals.size() * sizeof(double), &normals[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(1);											// Enable attribute index 1 as being used (normals)
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), (GLvoid*)(vertices.size() * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Texture Coordinates Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size()) * sizeof(double), textures.size() * sizeof(double), &textures[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(2);												// Enable attribute index 2 as being used (texture coordinates)
-	glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (GLvoid*)((vertices.size() + normals.size()) * sizeof(double)));						// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Color Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size()) * sizeof(double), colors.size() * sizeof(double), &colors[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(3);												// Enable attribute index 3 as being used
-	glVertexAttribPointer(3, 4, GL_DOUBLE, GL_FALSE, 4 * sizeof(double), (GLvoid*)((vertices.size() + normals.size() + textures.size()) * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Draw Primitive
-	glDrawArrays(GL_QUADS, 0, (int) nv / 3);
-
-// Dissable Attrib arrays
-	glDisableVertexAttribArray(0);		// Disable attribute index 0 as being used (Position)
-	glDisableVertexAttribArray(1);		// Disable attribute index 1 as being used (Normal)
-	glDisableVertexAttribArray(2);		// Disable attribute index 2 as being used (Texture Coordinates)
-	glDisableVertexAttribArray(3);		// Disable attribute index 3 as being used (Color)
-
-// It is good idea to release VBOs with ID 0 after use.
-// Once bound with 0, all pointers in gl*Pointer() behave as real
-// pointer, so, normal vertex array operations are re-activated
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vboId);
-
-// Unbind and delete VAO
-	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &vaoId);
-
-}
-
-
-// ACTIVACIÓ VERTEX ARRAY DE GL_QUADS PER A VAO AMB TRANSPARÈNCIES
-void draw_GL_QUADS_VAO2(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures)
-{
-// ----------------------- VAO, VBO
-	GLuint vaoId = 0, vboId = 0;
-	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
-	//std::vector <int>::size_type nn = normals.size();	// Tamany del vector normals en elements.
-	//std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
-	//std::vector <int>::size_type nt = textures.size();	// Tamany del vector textures en elements.
-
-// Create Vertex Array Object (VAO) for 3D Model Cube
-	glGenVertexArrays(1, &vaoId);
-
-// Create vertex buffer objects for 3D Model attributes in the VAO
-	glGenBuffers(1, &vboId);
-
-// Bind our Vertex Array Object as the current used object
-	glBindVertexArray(vaoId);
-
-// Bind our Vertex Buffer Object as the current used object
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size() + colors.size()) * sizeof(double), 0, GL_STATIC_DRAW);
-
-// Position Vertex attributes
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(double), &vertices[0]);	// Copy geometry data to VBO starting from 0 offest
-	glEnableVertexAttribArray(0);											// Enable attribute index 0 as being used (position)
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);	// Specify that our coordinate data is going into attribute index 0 and contains 3 double
-
-// Normal Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(double), normals.size() * sizeof(double), &normals[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(1);											// Enable attribute index 1 as being used (normals)
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), (GLvoid*)(vertices.size() * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Texture Coordinates Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size()) * sizeof(double), textures.size() * sizeof(double), &textures[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(2);												// Enable attribute index 2 as being used (texture coordinates)
-	glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (GLvoid*)((vertices.size() + normals.size()) * sizeof(double)));						// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Color Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size()) * sizeof(double), colors.size() * sizeof(double), &colors[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(3);												// Enable attribute index 3 as being used
-	glVertexAttribPointer(3, 4, GL_DOUBLE, GL_FALSE, 4 * sizeof(double), (GLvoid*)((vertices.size() + normals.size() + textures.size()) * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Draw Primitive
-	glDrawArrays(GL_QUADS, 0, (int) nv / 3);
-
-// Dissable Attrib arrays
-	glDisableVertexAttribArray(0);		// Disable attribute index 0 as being used (Position)
-	glDisableVertexAttribArray(1);		// Disable attribute index 1 as being used (Normal)
-	glDisableVertexAttribArray(2);		// Disable attribute index 2 as being used (Texture Coordinates)
-	glDisableVertexAttribArray(3);		// Disable attribute index 3 as being used (Color)
-
-// It is good idea to release VBOs with ID 0 after use.
-// Once bound with 0, all pointers in gl*Pointer() behave as real
-// pointer, so, normal vertex array operations are re-activated
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vboId);
-
-// Unbind and delete VAO
-	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &vaoId);
-}
-
-
-// ACTIVACIÓ VERTEX ARRAY DE QUAD_STRIP PER A VAO
-void draw_GL_QUAD_STRIP_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures)
-{
-// ----------------------- VAO, VBO
-	GLuint vaoId = 0, vboId = 0;
-	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
-	//std::vector <int>::size_type nn = normals.size();	// Tamany del vector normals en elements.
-	//std::vector <int>::size_type nc = colors.size();	// Tamany del vector colors en elements.
-	//std::vector <int>::size_type nt = textures.size();	// Tamany del vector textures en elements.
-
-// Create Vertex Array Object (VAO) for 3D Model Cube
-	glGenVertexArrays(1, &vaoId);
-
-// Create vertex buffer objects for 3D Model attributes in the VAO
-	glGenBuffers(1, &vboId);
-
-// Bind our Vertex Array Object as the current used object
-	glBindVertexArray(vaoId);
-
-// Bind our Vertex Buffer Object as the current used object
-	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size() + colors.size()) * sizeof(double), 0, GL_STATIC_DRAW);
-
-// Position Vertex attributes
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(double), &vertices[0]);	// Copy geometry data to VBO starting from 0 offest
-	glEnableVertexAttribArray(0);											// Enable attribute index 0 as being used (position)
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);	// Specify that our coordinate data is going into attribute index 0 and contains 3 double
-
-// Normal Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(double), normals.size() * sizeof(double), &normals[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(1);											// Enable attribute index 1 as being used (normals)
-	glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), (GLvoid*)(vertices.size() * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Texture Coordinates Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size()) * sizeof(double), textures.size() * sizeof(double), &textures[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(2);												// Enable attribute index 2 as being used (texture coordinates)
-	glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), (GLvoid*)((vertices.size() + normals.size()) * sizeof(double)));						// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Color Vertex Attributes
-	glBufferSubData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + textures.size()) * sizeof(double), colors.size() * sizeof(double), &colors[0]);	// Copy normal data to VBO starting from 0 offest
-	glEnableVertexAttribArray(3);												// Enable attribute index 3 as being used
-	glVertexAttribPointer(3, 4, GL_DOUBLE, GL_FALSE, 4 * sizeof(double), (GLvoid*)((vertices.size() + normals.size() + textures.size()) * sizeof(double)));	// Specify that our color data is going into attribute index 0 and contains 3 double
-
-// Draw Primitive
-	glDrawArrays(GL_QUAD_STRIP, 0, (int) nv / 3);
-
-// Dissable Attrib arrays
-	glDisableVertexAttribArray(0);		// Disable attribute index 0 as being used (Position)
-	glDisableVertexAttribArray(1);		// Disable attribute index 1 as being used (Normal)
-	glDisableVertexAttribArray(2);		// Disable attribute index 2 as being used (Texture Coordinates)
-	glDisableVertexAttribArray(3);		// Disable attribute index 3 as being used (Color)
 
 // It is good idea to release VBOs with ID 0 after use.
 // Once bound with 0, all pointers in gl*Pointer() behave as real

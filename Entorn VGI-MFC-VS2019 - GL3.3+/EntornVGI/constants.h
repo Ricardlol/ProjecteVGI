@@ -161,6 +161,13 @@ struct CEsfe3D
 	GLdouble beta;
 };
 
+// --------------- VGI: Estructura LLista VAO
+struct CVAO
+{	GLuint vaoId;
+	GLuint vboId;
+	GLint nVertexs;
+};
+
 // --------------- VGI: INSTANCIA (TG d'instanciació d'un objecte)
 struct INSTANCIA
 {	CPunt3D VTras;	// Vector de Traslació

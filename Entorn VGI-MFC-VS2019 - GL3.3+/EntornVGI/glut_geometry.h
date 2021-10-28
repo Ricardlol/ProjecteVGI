@@ -79,14 +79,11 @@
 #define  GLET_GEOMETRY_H
 
  /* -- INTERFACE CONSTANTS -------------------------------------------------- */
-//--------------- VGI: Màxim tamany vector vboId
-#define MAX_SIZE_VBOID 40
 
-//--------------- VGI: Màxim tamany vector vaoId
-#define MAX_SIZE_VAOID 40
+//--------------- VGI: Màxim tamany vector vaoList
+#define MAX_SIZE_VAOID 45
 
-//--------------- VGI: Apuntados estructures VBO dins vboId per primitives
-
+//--------------- VGI: Apuntadors a l'estructura VAOList per primitives
 #define GLUT_CUBE 0
 #define GLUT_CUBE_RGB 1
 #define GLUT_SPHERE 2
@@ -127,70 +124,69 @@
 #define GLUT_USER2 37
 #define GLUT_USER3 38
 #define GLUT_USER4 39
-
- /* -- INTERFACE VARIABLES -------------------------------------------------- */
-// vboId: Vector d'identificadors de Vertex Buffer Objects per a primitives glut_geometry.
-								// Cada posició del vector correspon a una primitiva:
-								// 0: GLUT_CUBE, 1:GLUT_CUBE_RGB, 2:GLUT_SPHERE, 3: GLUT_CONE, 4: GLUT_CYLINDER,
-								// 5: GLUT_TORUS, 6: GLUT_DODECAHEDRON, 7: GLUT_OCTAHEDRON, 8: GLUT_TETRAEDRON,
-								// 9: GLUT_ICOSAHEDRON, 10: GLUT_RHOMBICDODECAHEDRON, 11: GLUT_SIERPINSKISPONGE, 
-								// 12: GLU_TEAPOT, 12: GLU_CYLINDER, 14: GLU_DISK, 15: GLU_PARTIALDISK,
-								// 16: GLU_SPHERE, 17: CRV_POLYLINE, 18: CRV_LEMNISCATA2D, 19: CRV_LEMNISCATA3D.
-								// 20: CRV_BSPLINE, 21: CRV_BEZIER, 22:SUP_BSPLINE, 23: SUP_BEZIER, 24: GLUT_LINES,
-								// 25: GLUT_TRIANGLES, 26: GLUT_USER.
+#define GLUT_USER5 40
+#define GLUT_USER6 41
+#define GLUT_USER7 42
+#define GLUT_USER8 43
+#define GLUT_USER9 44
 
 
- /* -- INTERFACE FUNCTIONS -------------------------------------------------- */
+// ------------------------ INTERFACE FUNCTIONS ---------------------------------*/
+//--------------- SETS (o PUTS)
 void SetColor4d(GLdouble red, GLdouble green, GLdouble blue, GLdouble alpha);
-void deleteVAO(GLint k);		// Eliminates the VAO and VBO's structures of the GLUT primitive.
+void Set_VAOList(GLint k, CVAO auxVAO);
+void Set_vaoId(GLuint k, GLuint vaoId);
+void Set_vboId(GLuint k, GLuint vboId);
+void Set_nVertexs(GLuint k, GLint nvertexs);
+//--------------- GETS
+CVAO Get_VAOList(GLint k);
+GLuint Get_VAOId(GLint k);
+
+void initVAOList();
+void netejaVAOList();
+void deleteVAOList(GLint k);
+void draw_TriVAO_Object(GLint k);
+void draw_LinVAO_Object(GLint k);
 
 /* ---------- CUBE -----------------------------------------------------------*/
 void glutSolidCube(GLdouble dSize);		// Generates solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
-void glutSolidCube_VAO(GLdouble dSize); // Generates a VBO solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
-void drawSolidCube();				// Draws the VBO solid Cube.  Code contributed by Enric Martí <enric.marti@uab.cat>
-void glutSolidCubeRGB(GLdouble dSize);// Draws a solid cube coloured by RGB with VBO. Code contributed by Enric Marti <enric.marti@uab.cat>
-void glutSolidCubeRGB_VAO(GLdouble dSize);// Draws a solid cube coloured by RGB with VBO. Code contributed by Enric Marti <enric.marti@uab.cat>
-void drawSolidCubeRGB();
-void glutSolidCubeT(GLdouble dSize);
+CVAO loadglutSolidCube_VAO(GLdouble dSize);
+
+void glutSolidCubeRGB(GLdouble dSize);// Draws a solid cube coloured by RGB with VAO. Code contributed by Enric Marti <enric.marti@uab.cat>
+CVAO loadglutSolidCubeRGB_VAO(GLdouble dSize);// Draws a solid cube coloured by RGB with VAO. Code contributed by Enric Marti <enric.marti@uab.cat>
+
 
 // ---------- CUBE SKYBOX -----------------------------------------------------------
 void CubeSkybox(GLdouble dSize);
-GLuint loadCubeSkybox_VAO();
+CVAO loadCubeSkybox_VAO();
 void drawCubeSkybox();
 
 /* ---------- SPHERE ----------------------------------------------------------*/
 void glutSolidSphere(GLdouble radius, GLint slices, GLint stacks); // Draws a solid sphere
-GLint glutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks); // Draws a solid sphere in VBO
-void drawSolidSphere(GLint nvert);
+CVAO loadglutSolidSphere_VAO(GLdouble radius, GLint slices, GLint stacks); // Draws a solid sphere in VAO
 void fghCircleTable(double **sint, double **cost, const int n);
 
 /* ---------- CONE ------------------------------------------------------------*/
 void glutSolidCone(GLdouble base, GLdouble height, GLint slices, GLint stacks); // Draws a solid cone
-GLint glutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stacks); // Draws a solid cone in VBO
-void drawSolidCone(GLint nvert);
+CVAO loadglutSolidCone_VAO(GLdouble base, GLdouble height, GLint slices, GLint stacks); // Draws a solid cone in VAO
 
 /* ---------- CYLINDER --------------------------------------------------------*/
 void glutSolidCylinder(GLdouble radius, GLdouble height, GLint slices, GLint stacks); // Draws a solid cylinder
-GLint glutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLint stacks); // Draws a solid cylinder
-void drawSolidCylinder(GLint nvert);
+CVAO loadglutSolidCylinder_VAO(GLdouble radius, GLdouble height, GLint slices, GLint stacks); // Draws a solid cylinder
 
 /* ---------- TORUS -----------------------------------------------------------*/
 void glutSolidTorus(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings); // Draws a solid torus
-GLint glutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings); // Draws a solid torus in VBO
-void drawSolidTorus(GLint nvert);
+CVAO loadglutSolidTorus_VAO(GLdouble dInnerRadius, GLdouble dOuterRadius, GLint nSides, GLint nRings); // Draws a solid torus in VAO
 
 /* ---------- DODECAHEDRON -----------------------------------------------------*/
 void glutSolidDodecahedron(void);	// Draws a solid dodecahedron
-void glutSolidDodecahedron_VAO(void); // Draws a solid dodecahedron in VBO
-void drawSolidDodecahedron();
+CVAO loadglutSolidDodecahedron_VAO(void); // Draws a solid dodecahedron in VAO
 
 /* ---------- OCTAHEDRON -----------------------------------------------------*/
 void glutSolidOctahedron(void); // Draws a solid octahedron
-void glutSolidOctahedron_VAO(void); // Draws a solid octahedron in VBO
-void drawSolidOctahedron();
+CVAO loadglutSolidOctahedron_VAO(void); // Draws a solid octahedron in VAO
 
 /* ---------- TETRAHEDRON -----------------------------------------------------*/
-
 #define NUM_TETR_FACES     4
 
 static GLdouble tet_r[4][3] = { { 1.0, 0.0, 0.0 },
@@ -204,8 +200,7 @@ static GLint tet_i[4][3] =  /* Vertex indices */
 };
 
 void glutSolidTetrahedron(void);	// Draws a solid tetrahedron
-void glutSolidTetrahedron_VAO(void);	// Draws a solid tetrahedron in VBO
-void drawSolidTetrahedron();
+CVAO loadglutSolidTetrahedron_VAO(void);	// Draws a solid tetrahedron in VBO
 
 /* ---------- ICOSAHEDRON -----------------------------------------------------*/
 static GLdouble icos_r[12][3] = {
@@ -247,8 +242,7 @@ static int icos_v [20][3] = {
 };
 
 void glutSolidIcosahedron(void);	// Draws a solid icosahedron
-void glutSolidIcosahedron_VAO(void);	// Draws a solid icosahedron in VBO
-void drawSolidIcosahedron();
+CVAO loadglutSolidIcosahedron_VAO(void);	// Draws a solid icosahedron in VBO
 
 /* ---------- RHOMBIC DODECAHEDRON ---------------------------------------------*/
 /*
@@ -301,20 +295,21 @@ static GLdouble rdod_n[12][3] = {
     {  0.353553390594, -0.353553390594, -0.5 }
 };
 
-void glutSolidRhombicDodecahedron(void);	// Draws a solid Rhombic Dodecahedron
-void glutSolidRhombicDodecahedron_VAO(void);	// Draws a solid Rhombic Dodecahedron in VBO
-void drawSolidRhombicDodecahedron();
+void glutSolidRhombicDodecahedron(void);		// Draws a solid Rhombic Dodecahedron
+CVAO loadglutSolidRhombicDodecahedron_VAO(void);	// Load a solid Rhombic Dodecahedron in VAO
 
 /* ---------- SIERPINSKI SPONGE --------------------------------------------- */
 void glutSolidSierpinskiSponge(int num_levels, GLdouble offset[3], GLdouble scale);		// Draws a solid Sierspinski Sponge
-GLint glutSolidSierpinskiSponge_VAO(int num_levels, GLdouble offset[3], GLdouble scale);		// Draws a solid Sierspinski Sponge in VBO
+CVAO loadglutSolidSierpinskiSponge_VAO(int num_levels, GLdouble offset[3], GLdouble scale);		// Draws a solid Sierspinski Sponge in VBO
 void glutSolidSierpinskiSpongeR(int num_levels, GLdouble offset[3], GLdouble scale, std::vector <double>& vertices, std::vector <double>& normals,
 	std::vector <double>& colors, std::vector <double>& textures);
-void drawSolidSierpinskiSponge(GLint nvert);
 
 /* ---------- TEAPOT_DATA --------------------------------------------------- */
 /* Submitted through the kind offices of Daniel Wagner (daniel@ims.tuwien.ac.at)
 */
+
+/*---------------------------Piece Tetris---------------------------------- */
+void glutSolidTetris(GLdouble dSize, int idPiece);
 
 /* 530 vertices */
 const int numVertices = 530;
@@ -2592,29 +2587,26 @@ const int strip_normals[] = {
 };
 
 /* -- TEAPOT FUNCTIONS ---------------------------------------------------- */
-static void fghTeapot(GLint grid, GLdouble scale, GLenum type);
+//static void fghTeapot(GLint grid, GLdouble scale, GLenum type, GLint k);
+CVAO fghTeapot(GLint grid, GLdouble scale, GLenum type);
 
 /* -- TEAPOT INTERFACE FUNCTIONS -------------------------------------------------- */
 void glutSolidTeapot(GLdouble size);			// Draws a solid Teapot
-void glutSolidTeapot_VAO(GLdouble size);			// Draws a solid Teapot in VBO
-void drawSolidTeapot();
+CVAO loadglutSolidTeapot_VAO(GLdouble size);		// Draws a solid Teapot in VAO
 
 /* ---------- PRIMITIVES GLU (CILINDRE, DISC, ESFERA) -------------------------*/
 void gluCylinder(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks);
-GLint gluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks);
-void drawgluCylinder(GLint nvert);
+CVAO loadgluCylinder_VAO(GLdouble baseRadius, GLdouble topRadius, GLdouble height, GLint slices, GLint stacks);
 
 void gluDisk(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops);
-GLint gluDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops);
-void drawgluDisk(GLint nvert);
+CVAO loadgluDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops);
+//void drawgluDisk(GLint nvert);
 
 void gluPartialDisk(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle);
-GLint gluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle, GLint index);
-void drawgluPartialDisk(GLint nvert);
+CVAO loadgluPartialDisk_VAO(GLdouble innerRadius, GLdouble outerRadius, GLint slices, GLint loops, GLdouble startAngle, GLdouble sweepAngle);
 
 void gluSphere(GLdouble radius, GLint slices, GLint stacks);
-GLint gluSphere_VAO(GLdouble radius, GLint slices, GLint stacks);
-void drawgluSphere(GLint nvert);
+CVAO loadgluSphere_VAO(GLdouble radius, GLint slices, GLint stacks);
 
 // ------------------------------- DIBUIX DE CORBES i SUPERFICIES --------------------------------
 
@@ -2640,8 +2632,7 @@ const GLdouble PAS_POLYLINE = 0.10;	// Pas Polyline. Precisió del Polyline
 
 //void draw_PolyLine(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsPolyLine, float pas, bool TFrenet);
 void draw_PolyLine(CPunt3D* ctr_points, int nptsPolyLine, float pas);
-int draw_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas);
-void drawCRVPolyLine(GLint npunts);
+CVAO load_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas);
 void draw_TFPolyLine(GLuint sh_programID, CPunt3D* ctr_points, int nptsPolyLine, float pas);
 CPunt3D Punt_PolyLine(float t, CPunt3D* ctr);
 // D_Polyline: Funció per a calcular la primera derivada de la Polylinesegons:
@@ -2668,8 +2659,7 @@ CPunt3D VNormal(CPunt3D v1, CPunt3D v2);
 const GLdouble PAS_LEMNISCATA = 0.10;
 
 void draw_Lemniscata2D(float escala, float pas);
-GLint draw_Lemniscata2D_VAO(float escala, float pas);
-void drawCRVLemniscata2D(GLint npunts);
+CVAO load_Lemniscata2D_VAO(float escala, float pas);
 void draw_TFLemniscata2D(GLuint sh_programID, float escala, float pas);
 CPunt3D Punt_Lemniscata2D(float t, float scale);
 CPunt3D D_Lemniscata2D(float t, float scale);
@@ -2678,8 +2668,7 @@ CPunt3D VT_Lemniscata2D(float t, float scale);
 CPunt3D VBN_Lemniscata2D(float t, float scale);
 
 void draw_Lemniscata3D(float escala, float pas);
-GLint draw_Lemniscata3D_VAO(float escala, float pas);
-void drawCRVLemniscata3D(GLint npunts);
+CVAO load_Lemniscata3D_VAO(float escala, float pas);
 void draw_TFLemniscata3D(GLuint sh_programID, float escala, float pas);
 CPunt3D Punt_Lemniscata3D(float t, float scale);
 CPunt3D D_Lemniscata3D(float t, float scale);
@@ -2714,9 +2703,8 @@ const CPunt3D corbaS1[] = { { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.
 const int nptsCS1 = 9;
 const GLdouble PAS_BSPLINE = 0.10;	// Pas Spline. Precisió de la corba
 
-void draw_BSpline_Curve(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas);
-int draw_BSpline_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas);
-void drawCRVBSpline(GLint nounts);
+void draw_BSpline_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
+CVAO load_BSpline_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
 void draw_TFBSpline_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas);
 CPunt3D Punt_Corba_BSpline(float t, CPunt3D * ctr);
 
@@ -2751,9 +2739,8 @@ const int MAX_PATCH_BEZIER = 25;	// Màxim tamany vector Punts de control
 const GLdouble PAS_BEZIER = 0.10;	// Pas Bezier. Precisió de la corba
 
 // Dibuix Corba de Bezier en VBO
-void draw_Bezier_Curve(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas, bool tancat);
-int draw_Bezier_Curve_VAO(CPunt3D ctr_points[MAX_PATCH_CORBA], int nptsCorba, float pas, bool tancat);
-void drawCRVBezier(GLint npunts);
+void draw_Bezier_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA],  float pas, bool tancat);
+CVAO load_Bezier_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas, bool tancat);
 void draw_TFBezier_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas, bool tancat);
 CPunt3D Punt_Bezier_Curve(float t, CPunt3D * ctr);
 
@@ -2775,15 +2762,11 @@ CPunt3D VT_Bezier_Curve(float t, CPunt3D* ctr);
 CPunt3D VBN_Bezier_Curve(float t, CPunt3D* ctr);
 
 // ------------------------- ACTIVACIÓ VERTEX ARRAY DE CADA FORMA GL_* PER A VBO
-GLint load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors);
+GLint load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors, GLuint& vboID);
 void draw_LINES_VAO(int nvert, GLint vaoId);
-GLint load_TRIANGLES_VAO(int prim_Id, std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
-void draw_TRIANGLES_VAO(GLint vaoId, int nvert);
+GLint load_TRIANGLES_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures, GLuint& vboID);
+void draw_TRIANGLES_VAO(GLint vaoList_indx);
 void draw_GL_LINES_VAO(std::vector <double> vertices, std::vector <double> colors);
-void draw_GL_POLYGON_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
-void draw_GL_QUADS_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
-void draw_GL_QUADS_VAO2(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
-void draw_GL_QUAD_STRIP_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
 void draw_GL_TRIANGLES_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
 void draw_GL_TRIANGLE_FAN_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);
 void draw_GL_TRIANGLE_STRIP_VAO(std::vector <double> vertices, std::vector <double> normals, std::vector <double> colors, std::vector <double> textures);

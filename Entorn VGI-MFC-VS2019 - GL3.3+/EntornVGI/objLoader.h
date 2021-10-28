@@ -65,12 +65,13 @@ struct Material
 class OBJLOADER_CLASS_DECL COBJModel  
 {
   public:
-	  void _stdcall DrawModel();
+	  void _stdcall DrawModel(int prim_Id);
 //	  bool _stdcall LoadModel(const char szFileName[],unsigned int iDisplayList);
-	  GLuint _stdcall LoadModel(char *szFileName, int prim_Id, int& nvert);
+	  GLuint _stdcall LoadModel(char *szFileName, int prim_Id);
 	  _stdcall COBJModel();
 	  virtual _stdcall ~COBJModel();
-	  void _stdcall EliminaLlista(unsigned int iDisplayList);
+	  //void _stdcall EliminaLlista(unsigned int iDisplayList);
+	  void _stdcall EliminaLlista(int prim_Id);
   private:
 	  void _stdcall ReadNextString(char szString[], FILE *hStream);
 //	  int _stdcall LoadTexture(const char szFileName[_MAX_PATH]);
@@ -80,8 +81,8 @@ class OBJLOADER_CLASS_DECL COBJModel
 	  void _stdcall MakePath(char szFileAndPath[]);
 	  bool _stdcall LoadMaterialLib(const char szFileName[], Material *pMaterials,
 		  unsigned int *iCurMaterialIndex, char szBasePath[]);
-	  GLuint _stdcall RenderToDisplayList(const Face *pFaces, const unsigned int iFaceCount,
-		  const Material *pMaterials, int prim_Id, int& nvert);
+	  GLuint _stdcall RenderToVAOList(const Face *pFaces, const unsigned int iFaceCount,
+		  const Material *pMaterials, int prim_Id);
 	  void _stdcall GetFaceNormal(float fNormalOut[3], const Face *pFace);
 	  void _stdcall ParseFaceString(char szFaceString[], Face *FaceOut, const Vector3D *pVertices,
 		  const Vector3D *pNormals, const Vector2D *pTexCoords, const unsigned int iMaterialIndex);

@@ -57,7 +57,7 @@ _stdcall COBJModel::~COBJModel()
 }
 
 //bool _stdcall COBJModel::LoadModel(const char szFileName[],unsigned int iDisplayList)
-GLuint _stdcall COBJModel::LoadModel(char *szFileName, int prim_Id, int& nvert)
+GLuint _stdcall COBJModel::LoadModel(char *szFileName, int prim_Id)
 {
 	////////////////////////////////////////////////////////////////////////
 	// Load a OBJ file and render its data into a display list
@@ -230,7 +230,7 @@ GLuint _stdcall COBJModel::LoadModel(char *szFileName, int prim_Id, int& nvert)
 	//if (m_iDisplayList>0) glDeleteLists(m_iDisplayList, 1);
 
 // Render all faces into a display list
-	vaoId = RenderToDisplayList(pFaces, OBJInfo.iFaceCount, pMaterials,prim_Id, nvert);
+	vaoId = RenderToVAOList(pFaces, OBJInfo.iFaceCount, pMaterials, prim_Id);
 
 ////////////////////////////////////////////////////////////////////////
 // Free structures that hold the model data
@@ -488,10 +488,10 @@ bool _stdcall COBJModel::LoadMaterialLib(const char szFileName[],
 	return TRUE;
 }
 
-GLuint _stdcall COBJModel::RenderToDisplayList(const Face *pFaces, 
+GLuint _stdcall COBJModel::RenderToVAOList(const Face *pFaces, 
 									const unsigned int iFaceCount,
 									const Material *pMaterials,
-									int prim_Id, int &nvert)
+									int prim_Id)
 {
 ////////////////////////////////////////////////////////////////////////
 // Render a list of faces into a display list
@@ -503,7 +503,7 @@ GLuint _stdcall COBJModel::RenderToDisplayList(const Face *pFaces,
 	double color[4] = { 1.0F, 0.0f, 0.0f, 1.0f };
 
 // VAO
-	GLuint vaoId = 0;
+	GLuint vaoId = 0;		GLuint vboId = 0;
 	std::vector <double> vertices, colors, normals, textures;		// Definició vectors dinàmics per a vertexs i colors 
 	vertices.resize(0);		colors.resize(0);	normals.resize(0);		textures.resize(0);// Reinicialitzar vectors
 	
@@ -743,8 +743,11 @@ GLuint _stdcall COBJModel::RenderToDisplayList(const Face *pFaces,
 // ----------------------- VAO
 	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 
-	vaoId = load_TRIANGLES_VAO(prim_Id,vertices, normals, colors, textures);
-	nvert = (int) nv / 3;
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+	Set_vaoId(prim_Id, vaoId);
+	Set_vboId(prim_Id, vboId);
+	int nvert = (int) nv / 3;
+	Set_nVertexs(prim_Id, nvert);
 	return vaoId;
 }
 
@@ -1172,10 +1175,11 @@ int COBJModel::LoadTexture2(const char szFileName[_MAX_PATH])
 	return iTexture;
 }
 
-void _stdcall COBJModel::DrawModel()
+void _stdcall COBJModel::DrawModel(int prim_Id)
 {
 	
-		glCallList(m_iDisplayList);
+	//glCallList(m_iDisplayList);
+	deleteVAOList(prim_Id);
 	
 }
 
@@ -1192,7 +1196,9 @@ OBJLOADER_CLASS_DECL void _stdcall UnInitObject(COBJModel * obj)
   delete obj; //Release TMyObject instance
 }
 
-void _stdcall COBJModel::EliminaLlista(unsigned int iDisplayList)
+//void _stdcall COBJModel::EliminaLlista(unsigned int iDisplayList)
+void _stdcall COBJModel::EliminaLlista(int prim_Id)
 {
-	glDeleteLists(iDisplayList, 1);
+	//glDeleteLists(iDisplayList, 1);
+	deleteVAOList(prim_Id);
 }

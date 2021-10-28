@@ -81,7 +81,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 			CColor col_object, bool sw_mat[5],
 			bool textur, GLint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 			int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
-			GLuint vaoId3DS, int nvert3DS, GLuint vaoIdOBJ, int nvertOBJ,
+			GLuint vaoList_3DS, GLuint vaoList_OBJ,
 			glm::mat4 MatriuVista, glm::mat4 MatriuTG)
 {
 	float altfar = 0;
@@ -93,6 +93,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	
 // Matrius de Transformació
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0), TransMatrix(1.0), ScaleMatrix(1.0), RotMatrix(1.0);
+
+// VAO
+	CVAO objectVAO;
+	objectVAO.vaoId = -1;	objectVAO.vboId = -1;	objectVAO.nVertexs = 0;
 
 	tras[0] = 0.0;	tras[1] = 0.0; tras[2] = 0.0;
 	color_vermell.r = 1.0;	color_vermell.g = 0.0; color_vermell.b = 0.0; color_vermell.a = 1.0;
@@ -130,7 +134,13 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Dibuix geometria Mar
 		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 1.0;
 		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
-		sea(sh_programID, MatriuVista, MatriuTG, color_Mar);
+		//sea(sh_programID, MatriuVista, MatriuTG, color_Mar);
+		// Pas ModelView Matrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		// Pas NormalMatrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+		draw_TriVAO_Object(MAR_FRACTAL_VAO);
 		break;
 
 // Dibuix de l'objecte TIE (Nau enemiga Star Wars)
@@ -146,7 +156,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 		// Dibuix de l'objecte 3DS amb textures 
-		draw_TRIANGLES_VAO(vaoId3DS, nvert3DS);		// Dibuixar VAO a pantalla
+		draw_TRIANGLES_VAO(vaoList_3DS);		// Dibuixar VAO a pantalla
 		break;
 
 // Dibuix de l'objecte OBJ
@@ -157,7 +167,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 		// Objecte OBJ: Dibuix de l'objecte OBJ amb textures
-		draw_TRIANGLES_VAO(vaoIdOBJ, nvertOBJ);		// Dibuixar VAO a pantalla
+		draw_TRIANGLES_VAO(vaoList_OBJ);		// Dibuixar VAO a pantalla
 		break;
 
 // Corba Bezier
@@ -166,7 +176,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		if (sw_PC)
 		{	// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color vermell.
 			SeleccionaColorMaterial(sh_programID, color_vermell, sw_material);
-			npunts = gluSphere_VAO(5.0, 20, 20);
+			objectVAO = loadgluSphere_VAO(5.0, 20, 20);
 
 			for (int i = 0; i < nptsU; i++)
 			{	//glPushMatrix();
@@ -177,10 +187,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 				  // Pas NormalMatrix a shader
 				  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 				  glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-				  drawgluSphere(npunts);	//gluSphere(5.0, 20, 20);
+				  draw_TriVAO_Object(GLU_SPHERE); //drawgluSphere(npunts);	//gluSphere(5.0, 20, 20);
 				//glPopMatrix();
 			}
-			deleteVAO(GLU_SPHERE);
+			//deleteVAO(GLU_SPHERE);
 		}
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		ModelMatrix = MatriuTG;
@@ -189,7 +199,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		draw_Bezier_Curve(PC_u, nptsU, pasCS, false);
+		draw_LinVAO_Object(CRV_BEZIER); //draw_Bezier_Curve(nptsU, PC_u, pasCS, false);
 		if (dib_TFrenet) draw_TFBezier_Curve(sh_programID, PC_u, nptsU, pasCS, false); // Dibuixar Triedre de Frenet
 		break;
 
@@ -202,7 +212,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		draw_Lemniscata3D(800, pasCS*20.0);
+		draw_LinVAO_Object(CRV_LEMNISCATA3D); //draw_Lemniscata3D(800, pasCS*20.0);
 		if (dib_TFrenet) draw_TFLemniscata3D(sh_programID, 800, pasCS * 20.0);
 		break;
 
@@ -212,7 +222,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		if (sw_PC)
 		{	// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color vermell.
 			SeleccionaColorMaterial(sh_programID, color_vermell, sw_material);
-			npunts = gluSphere_VAO(5.0, 20, 20);
+			//objectVAO = loadgluSphere_VAO(5.0, 20, 20);
 			for (int i = 0; i < nptsU; i++)
 			{	//glPushMatrix();
 				  //glTranslatef(PC_u[i].x, PC_u[i].y, PC_u[i].z);
@@ -222,10 +232,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 				// Pas NormalMatrix a shader
 				NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 				glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-				drawgluSphere(npunts);	//gluSphere(5.0, 20, 20);
+				draw_TriVAO_Object(GLU_SPHERE); // drawgluSphere(npunts);	//gluSphere(5.0, 20, 20);
 				//glPopMatrix();
 			}
-			deleteVAO(GLU_SPHERE);
+			//deleteVAO(GLU_SPHERE);
 		}
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		ModelMatrix = MatriuTG;
@@ -234,7 +244,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		draw_BSpline_Curve(PC_u, nptsU, pasCS);
+		draw_LinVAO_Object(CRV_BSPLINE); //draw_BSpline_Curve(nptsU, PC_u, pasCS);
 		if (dib_TFrenet) draw_TFBSpline_Curve(sh_programID, PC_u, nptsU, pasCS); // Dibuixar Triedre de Frenet
 		break;
 
@@ -309,7 +319,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 //	(separació en 3 funcions: *_VBO() per precompilació, draw*() per dibuix i deleteVBO() per alliberar VBO)
 	case MATRIUP_VAO:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-		glutSolidCube_VAO(1.0);		// Càrrega de la geometria del Cub al VAO
+		//glutSolidCube_VAO(1.0);		// Càrrega de la geometria del Cub al VAO
 
 		for (i = 0; i < 10; i++)
 			for (j = 0; j < 10; j++)
@@ -325,12 +335,12 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 					  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 					  glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 					  
-					  drawSolidCube();	// Dibuix del cub dins VBO.
+					  draw_TriVAO_Object(GLUT_CUBE); //drawSolidCube();	// Dibuix del cub dins VBO.
 
 				}
 		//deleteVAO(GLUT_CUBE);	// Eliminació del VAO cub.
 
-		nvertexs = glutSolidTorus_VAO(2.0, 3.0, 20, 20);	// Càrrega de la geometria del Torus al VAO
+		//nvertexs = glutSolidTorus_VAO(2.0, 3.0, 20, 20);	// Càrrega de la geometria del Torus al VAO
 		for (i = 0; i < 10; i++)
 			for (j = 0; j < 10; j++)
 			{	//glPushMatrix();
@@ -342,11 +352,11 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 				// Pas NormalMatrix a shader
 				NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 				glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-				drawSolidTorus(nvertexs);
+				draw_TriVAO_Object(GLUT_TORUS); //drawSolidTorus(nvertexs);
 
 			}
-		deleteVAO(GLUT_CUBE);		// Eliminació del VAO cub.
-		deleteVAO(GLUT_TORUS);    // Eliminació del VAO Torus.
+		//deleteVAO(GLUT_CUBE);		// Eliminació del VAO cub.
+		//deleteVAO(GLUT_TORUS);    // Eliminació del VAO Torus.
 // Dibuix una esfera
 		//glPushMatrix();
 		  //glTranslated(200.0, 200.0, 200.0);
@@ -358,7 +368,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		  // Pas NormalMatrix a shader
 		  glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		  gluSphere(1.0, 20, 20);
+		  draw_TriVAO_Object(GLU_SPHERE); //gluSphere(1.0, 20, 20);
 		//glPopMatrix();
 		break;
 
@@ -398,7 +408,7 @@ void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 Mat
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		glutSolidCube(1.0);
+		draw_TriVAO_Object(GLUT_CUBE);  //glutSolidCube(1.0);
 		//glPopMatrix();
 		break;
 
@@ -411,7 +421,7 @@ void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 Mat
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		glutSolidCubeRGB(1.0);
+		draw_TriVAO_Object(GLUT_CUBE_RGB); // glutSolidCubeRGB(1.0);
 		//glPopMatrix();
 		break;
 
@@ -425,7 +435,7 @@ void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 Mat
 		// Pas NormalMatrix a shader
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		gluSphere(1.0, 40, 40);
+		draw_TriVAO_Object(GLU_SPHERE); //gluSphere(1.0, 40, 40);
 		//glPopMatrix();
 		break;
 
@@ -439,19 +449,19 @@ void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 Mat
 		  // Pas NormalMatrix a shader
 		  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		  glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		  glutSolidTeapot(1.0);
+		  draw_TriVAO_Object(GLUT_TEAPOT); // glutSolidTeapot(1.0);
 		//glPopMatrix();
 		break;
 	}
 }
 
 // OBJECTE ARC
-void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4])
+void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
 {	CColor col_object;
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
 // Definir VAO del Cub
-	glutSolidCube_VAO(1.0);
+	//glutSolidCube_VAO(1.0);
 
 // Pota Esquerra
 	//glPushMatrix();
@@ -464,7 +474,7 @@ void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw
 	// Pas NormalMatrix a shader
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	drawSolidCube();	//  glutSolidCube(1.0);
+	draw_TriVAO_Object(GLUT_CUBE); // drawSolidCube();	//  glutSolidCube(1.0);
 	//glPopMatrix();
 
 // Pota Dreta
@@ -478,7 +488,7 @@ void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw
 	// Pas NormalMatrix a shader
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	drawSolidCube();	//  glutSolidCube(1.0);
+	draw_TriVAO_Object(GLUT_CUBE); //drawSolidCube();	//  glutSolidCube(1.0);
 	//glPopMatrix();
 
 // Travesser
@@ -494,11 +504,11 @@ void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	// Pas NormalMatrix a shader
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	drawSolidCube();	//  glutSolidCube(1.0);
+	draw_TriVAO_Object(GLUT_CUBE);  //drawSolidCube();	//  glutSolidCube(1.0);
 	//glPopMatrix();
 
-// Eliminar VBO del Cub
-	deleteVAO(GLUT_CUBE);
+// Eliminar VAO del Cub
+	//deleteVAO(GLUT_CUBE);
 
 // Esfera
 	col_object.r = 0.0;		col_object.g = 1.0;		col_object.b = 1.0;		col_object.a = 1.0;	// Color blau clar
@@ -511,7 +521,7 @@ void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw
 	// Pas NormalMatrix a shader
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	gluSphere(0.5, 20, 20);
+	draw_TriVAO_Object(GLU_SPHERE); //gluSphere(0.5, 20, 20);
 	//glPopMatrix();
 
 // Tetera
@@ -531,20 +541,22 @@ void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw
 	// Pas NormalMatrix a shader
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	glutSolidTeapot(1.0);
+	draw_TriVAO_Object(GLUT_TEAPOT); //glutSolidTeapot(1.0);
 	//glPopMatrix();
 }
 
 
 // Mar amb ondulacions
-void sea(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, CColor colorM)
+CVAO loadSea_VAO(CColor colorM)
 {
 	int i, j, step, it1, it2;
 	double angle, delay, Nx;
 	glm::mat4 ModelMatrix(1.0), NormalMatrix(1.0);
 
-// VBO
-	GLuint vboId = 0;
+// VAO
+	GLuint vaoId = 0; GLuint vboId = 0;
+	CVAO seaVAO;
+	seaVAO.vaoId = -1;	seaVAO.vboId = -1;	seaVAO.nVertexs = 0;
 	std::vector <double> vertices, normals, colors, textures;	// Definició vectors dinàmics per a vertexs, normals i textures 
 	vertices.resize(0);		normals.resize(0);		colors.resize(0);	textures.resize(0);			// Reinicialitzar vectors
 
@@ -552,13 +564,6 @@ void sea(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, CColor color
 	step = 10; //step = 5;
 	delay = 0;
 	it1 = 0;
-
-	ModelMatrix = MatriuTG;
-// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(shaderId, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	// Pas NormalMatrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
 //   SeleccionaMaterial(MAT_DEFAULT);	
 	float h = 2 * PI*step / 500;
@@ -597,7 +602,7 @@ void sea(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, CColor color
 			  vertices.push_back(i+step);		vertices.push_back(j+step);		vertices.push_back(0.0);		// Vector Vertices
 
 			//glEnd();
-// ----------------------- VBO
+// ----------------------- VAO
 			//std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
 			//draw_GL_TRIANGLES_VAO(vertices, normals, colors, textures);
 			//vertices.resize(0);	normals.resize(0);	colors.resize(0);	textures.resize(0);	// Reinicialitzar vectors
@@ -633,7 +638,14 @@ void sea(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, CColor color
 		}
 		it1++;
 	}
-	draw_GL_TRIANGLES_VAO(vertices, normals, colors, textures);
+// ----------------------- VAO
+	std::vector <int>::size_type nv = vertices.size();	// Tamany del vector vertices en elements.
+	//draw_GL_TRIANGLES_VAO(vertices, normals, colors, textures);
+	vaoId = load_TRIANGLES_VAO(vertices, normals, colors, textures, vboId);
+	seaVAO.vaoId = vaoId;
+	seaVAO.vboId = vboId;
+	seaVAO.nVertexs = (int)nv / 3;
+	return seaVAO;
 }
 
 
@@ -653,7 +665,8 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 // Matrius Transformació
 	glm::mat4 TransMatrix(1.0), ModelMatrix(1.0), NormalMatrix(1.0);
 	CColor col_object;
-	int nvertD = gluDisk_VAO(0.0f, 5.0f, 6, 1);
+	//int nvertD = gluDisk_VAO(0.0f, 5.0f, 6, 1);
+	draw_TriVAO_Object(GLU_DISK);
 
 // Ala 1 Parte central
 //Parte Exterior
@@ -673,7 +686,8 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(5.0f, 5.0f, 0.5f, 6, 1);
+	  
+	  draw_TriVAO_Object(GLU_CYLINDER);	//gluCylinder(5.0f, 5.0f, 0.5f, 6, 1);
 	//glPopMatrix();
 
 	//Tapas
@@ -691,7 +705,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); // drawgluDisk(nvertD);
 	//glPopMatrix();
 
 	//glPushMatrix();
@@ -708,7 +722,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); // drawgluDisk(nvertD);
 	//glPopMatrix();
 
 //Parte Interior
@@ -729,7 +743,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
- 	  gluCylinder(5.0f, 5.0f, 2.0f, 6, 1);
+	  draw_TriVAO_Object(GLUT_USER1); // gluCylinder(5.0f, 5.0f, 2.0f, 6, 1);
 	//glPopMatrix();
 
 //Tapas
@@ -747,7 +761,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 	//glPushMatrix();
@@ -764,7 +778,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 //Decoracion Exterior
@@ -790,7 +804,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 				NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 				// Pas NormalMatrix a shader
 				glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-				glutSolidCube(1.0f);
+				draw_TriVAO_Object(GLUT_CUBE); glutSolidCube(1.0f);
 			//glPopMatrix();
 		}
 	//glPopMatrix();
@@ -814,7 +828,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 			NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 			// Pas NormalMatrix a shader
 			glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		  glutSolidCube(1.0f);
+			draw_TriVAO_Object(GLUT_CUBE); //glutSolidCube(1.0f);
 		//glPopMatrix();
 	}
 	//glPopMatrix();
@@ -839,7 +853,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(5.0f, 5.0f, 0.5f, 6, 1);
+	  draw_TriVAO_Object(GLU_CYLINDER); gluCylinder(5.0f, 5.0f, 0.5f, 6, 1);
 	//glPopMatrix();
 
 //Tapas
@@ -857,7 +871,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 	//glPushMatrix();
@@ -874,7 +888,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 //Parte Interior
@@ -894,7 +908,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(5.0f, 5.0f, 2.0f, 6, 1);
+	  draw_TriVAO_Object(GLUT_USER1); // gluCylinder(5.0f, 5.0f, 2.0f, 6, 1);
 	//glPopMatrix();
 
 //Tapas
@@ -912,7 +926,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK);  //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 	//glPushMatrix();
@@ -930,7 +944,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	  //gluDisk(0.0f, 5.0f, 6, 1);
-	  drawgluDisk(nvertD);
+	  draw_TriVAO_Object(GLU_DISK); //drawgluDisk(nvertD);
 	//glPopMatrix();
 
 //Decoracion Exterior
@@ -957,7 +971,7 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 			NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 			// Pas NormalMatrix a shader
 			glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-			glutSolidCube(1.0f);
+			draw_TriVAO_Object(GLUT_CUBE); glutSolidCube(1.0f);
 		//glPopMatrix();
 	}
 	//glPopMatrix();
@@ -982,11 +996,11 @@ void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat
 			NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 			// Pas NormalMatrix a shader
 			glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-			glutSolidCube(1.0f);
+			draw_TriVAO_Object(GLUT_CUBE); //glutSolidCube(1.0f);
 		//glPopMatrix();
 	  }
 	//glPopMatrix();
-	  deleteVAO(GLU_DISK);
+	  //deleteVAO(GLU_DISK);
 };
 
 
@@ -1022,7 +1036,7 @@ void Motor(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 			NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 			// Pas NormalMatrix a shader
 			glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-			glutSolidCube(1.0f);
+			draw_TriVAO_Object(GLUT_CUBE); //glutSolidCube(1.0f);
 		//glPopMatrix();
 	  }
 	//glPopMatrix();
@@ -1044,7 +1058,7 @@ void Motor(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  glutSolidTorus(1.0, 5.0, 20, 20);
+	  draw_TriVAO_Object(GLUT_TORUS); //glutSolidTorus(1.0, 5.0, 20, 20);
 	//glPopMatrix();
 };
 
@@ -1071,7 +1085,7 @@ void Canon(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		gluCylinder(1.0f, 0.5f, 5.0f, 60, 1);
+		draw_TriVAO_Object(GLUT_USER2); //gluCylinder(1.0f, 0.5f, 5.0f, 60, 1);
 	//glPopMatrix();
 
 // Salida cañon 2
@@ -1086,7 +1100,7 @@ void Canon(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(1.0f, 0.5f, 5.0f, 60, 1);
+	  draw_TriVAO_Object(GLUT_USER2); // gluCylinder(1.0f, 0.5f, 5.0f, 60, 1);
 	//glPopMatrix();
 
 // Cañon 1
@@ -1104,7 +1118,7 @@ void Canon(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		gluCylinder(0.35f, 0.35f, 5.0f, 80, 1);
+		draw_TriVAO_Object(GLUT_USER3); // gluCylinder(0.35f, 0.35f, 5.0f, 80, 1);
 	//glPopMatrix();
 
 //Cañon 2
@@ -1119,7 +1133,7 @@ void Canon(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_ma
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(0.35f, 0.35f, 5.0f, 80, 1);
+		draw_TriVAO_Object(GLUT_USER3); // gluCylinder(0.35f, 0.35f, 5.0f, 80, 1);
 	//glPopMatrix();
 }
 
@@ -1148,7 +1162,7 @@ void Cuerpo(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_m
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(4.0f, 2.0f, 10.25f, 40, 1);
+	  draw_TriVAO_Object(GLUT_USER4); // gluCylinder(4.0f, 2.0f, 10.25f, 40, 1);
 	//glPopMatrix();
 
 //X2
@@ -1163,7 +1177,7 @@ void Cuerpo(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_m
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  glutSolidTorus(1.0, 5.0, 20, 20);
+	  draw_TriVAO_Object(GLUT_TORUS); // glutSolidTorus(1.0, 5.0, 20, 20);
 	//glPopMatrix();
 
 //Lado 1
@@ -1181,7 +1195,7 @@ void Cuerpo(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_m
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  gluCylinder(4.0f, 2.0f, 10.25f, 40, 1);
+	  draw_TriVAO_Object(GLUT_USER4); // gluCylinder(4.0f, 2.0f, 10.25f, 40, 1);
 	//glPopMatrix();
 
 //X1
@@ -1197,7 +1211,7 @@ void Cuerpo(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_m
 	  NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	  // Pas NormalMatrix a shader
 	  glUniformMatrix4fv(glGetUniformLocation(shaderId, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	  glutSolidTorus(1.0, 5.0, 20, 20);
+	  draw_TriVAO_Object(GLUT_TORUS); //glutSolidTorus(1.0, 5.0, 20, 20);
 	//glPopMatrix();
 
 //Cuerpo

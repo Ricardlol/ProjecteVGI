@@ -37,10 +37,8 @@ protected: // Crear sólo a partir de serialización
 
 // Atributos
 public:
-
 	// se li passa a vista_esferica i serveix per, des del entornView, modificar a la força la posicó de la càmera sobre l'eix X
-	int camerax;
-
+	// int camerax;
 	CEntornVGIDoc* GetDocument() const;
 
 //-------------- Entorn VGI: Variables globals de CPractivaView
@@ -88,7 +86,7 @@ public:
 	bool SkyBoxCube;			// Booleana que controla si es visualitza Skybox [TRUE] o no [FALSE].
 	Shader shader_SkyBoxC;		// Shader Skybox Cub
 	GLuint skC_programID;		// Identificador program Skybox Cube
-	GLuint skC_VAOID;			// Identificador VAO Skybox Cube
+	CVAO skC_VAOID;				// Identificador VAO List (vaoId, vboId, nVertexs) per a Skybox Cube
 	GLuint cubemapTexture;		// Identificador textura cubemap.
 	Shader shaderSkyBox;		// Shader SkyBox
 
@@ -239,6 +237,8 @@ public:
 	void CEntornVGIView::Refl_MaterialOn();						// Activar Reflexió de Material
 	int CEntornVGIView::llegir_ptsC(char *nomf);				// Lectura Punts de Control Corba (B-spline o Bezier)
 	std::string CEntornVGIView::CString2String(const CString& cString); // Conversió CString --> std::string
+
+	void OnObjecteTetris();
 
 // Entorn VGI: Funcions de càrrega i activació de shaders
 	GLuint CEntornVGIView::initializeShaders(CString filename);

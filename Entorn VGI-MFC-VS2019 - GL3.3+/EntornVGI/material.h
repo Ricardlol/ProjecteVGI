@@ -70,8 +70,8 @@ enum
 /* ------------------------------------------------------------------------- */
 
 // Seleccionar Materials
-void SeleccionaMaterial(GLuint sh_programID, int quin, bool sw_mater[4]);
-void SeleccionaColorMaterial(GLuint sh_programID, CColor c_obj, bool sw_mater[4]);
+void SeleccionaMaterial(GLuint sh_programID, int quin, bool sw_mater[5]);
+void SeleccionaColorMaterial(GLuint sh_programID, CColor c_obj, bool sw_mater[5]);
 
 bool llegir_Material(GLuint sh_programID, char * filename,int index);
 #endif

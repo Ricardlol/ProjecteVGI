@@ -253,7 +253,9 @@ CEntornVGIView::CEntornVGIView()
 	objecte = CAP;		// objecte = TETERA;
 
 // Entorn VGI: Variables de control Skybox Cube
-	SkyBoxCube = false;		skC_programID = 0;		skC_VAOID = 0;  cubemapTexture = 0;
+	SkyBoxCube = false;		skC_programID = 0;		
+	skC_VAOID.vaoId = -1;	skC_VAOID.vboId = -1;	skC_VAOID.nVertexs = 0;	
+	cubemapTexture = 0;
 
 // Entorn VGI: Variables de control del menú Transforma
 	transf = false;		trasl = false;		rota = false;		escal = false;
@@ -379,24 +381,6 @@ CEntornVGIView::CEntornVGIView()
 	//InitAPI();
 	sw_shader = false;				shader_menu = CAP;				shader_programID = 0;
 
-/*
-// Càrrega SHADERS
-// Càrrega Shader Eixos
-	fprintf(stderr, "Eixos: \n");
-	//eixos_programID = shaderEixos.loadFileShaders(".\\shaders\\eixos.VERT", ".\\shaders\\eixos.FRAG");
-
-// Càrrega Shader Skybox
-	fprintf(stderr, "SkyBox: \n");
-	//skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
-
-// Càrrega Shader de Gouraud
-	sw_shader = true;				shader_menu = GOURAUD_SHADER;	shader_programID = 0;
-	//shaderGouraud.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
-	fprintf(stderr, "Gouraud_shdrML: \n");
-	//shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.VERT", ".\\shaders\\gouraud_shdrML.FRAG");
-	//shader_programID = shaderGouraud.getProgramID();
-*/
-
 // Entorn VGI: Variables de control dels botons de mouse
 	m_PosEAvall = (0, 0);		m_PosDAvall = (0, 0);
 	m_ButoEAvall = false;		m_ButoDAvall = false;
@@ -407,6 +391,7 @@ CEntornVGIView::CEntornVGIView()
 	w = 0;				h = 0;								// Mides finestra
 	w_old = 0;			h_old = 0;							// Copia mides finestre per a FullScreen
 	OPV.R = 15.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;	// Origen PV en esfèriques
+	//Vis_Polar = POLARZ;
 	Vis_Polar = POLARY;
 
 // Entorn VGI: Color de fons i de l'objecte
@@ -453,12 +438,29 @@ CEntornVGIView::CEntornVGIView()
 	iluInit();					// Inicialitzar llibreria ILU
 	ilutRenderer(ILUT_OPENGL);	// Inicialitzar llibreria ILUT per a OpenGL
 
+/* Entorn VGI : Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega SHADERS
+// Càrrega Shader Eixos
+		//fprintf(stderr, "Eixos: \n");
+	if (!eixos_programID) eixos_programID = shaderEixos.loadFileShaders(".\\shaders\\eixos.VERT", ".\\shaders\\eixos.FRAG");
+
+// Càrrega Shader de Gouraud
+	sw_shader = true;				shader_menu = GOURAUD_SHADER;
+	if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
+
+// Entorn VGI: Creació de la llista que dibuixarà els eixos Coordenades Món. Funció on està codi per dibuixar eixos	
+	if (!eixos_Id) eixos_Id = deixos();						// Funció que defineix els Eixos Coordenades Món com un VAO.
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+*/
+
 // Entorn VGI: Definir desplegable per a Full Screen
 	ContextMenu = new CMenu();
 	if (!ContextMenu->LoadMenu(IDR_MENU_WINDOW))	AfxMessageBox(_T("Fail to create context menu"));
 
-
-	
 }
 
 CEntornVGIView::~CEntornVGIView()
@@ -968,7 +970,8 @@ void CEntornVGIView::OnPaint()
 				ViewMatrix = Vista_Esferica(shader_programID, OPV, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
 				front_faces, oculta, test_vis, back_line,
 				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
-				eixos, grid, hgrid, camerax);
+				eixos, grid, hgrid);
+				//antiguo eixos, grid, hgrid, camerax);
 					}
 		else if (camera == CAM_NAVEGA) {
 			ViewMatrix = Vista_Navega(shader_programID, opvN, false, n, vpv, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
@@ -992,20 +995,22 @@ void CEntornVGIView::OnPaint()
 		break;
 
 	default:
-
 // Càrrega SHADERS
 // Càrrega Shader Eixos
-		//fprintf(stderr, "Eixos: \n");
 		if (!eixos_programID) eixos_programID = shaderEixos.loadFileShaders(".\\shaders\\eixos.VERT", ".\\shaders\\eixos.FRAG");
 
 // Càrrega Shader de Gouraud
 		sw_shader = true;				shader_menu = GOURAUD_SHADER;
-		//fprintf(stderr, "Gouraud_shdrML: \n");
 		if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
-		//shader_programID = shaderLighting.getProgramID();
 
 // Entorn VGI: Creació de la llista que dibuixarà els eixos Coordenades Món. Funció on està codi per dibuixar eixos	
 		if (!eixos_Id) eixos_Id = deixos();						// Funció que defineix els Eixos Coordenades Món com un VAO.
+
+// Definció projecció PERSPECTIVA
+		/// TOTES LES INICIALITZACIONS
+		projeccio = PERSPECT;
+		OnVistaSkyBox();
+		OnIluminacioGouraud();
 
 // Crida a la funció Fons Blanc
 		FonsB();
@@ -1046,7 +1051,8 @@ void CEntornVGIView::dibuixa_Escena()
 	dibuixa_EscenaGL(shader_programID, eixos, eixos_Id, grid, hgrid, objecte, col_obj, sw_material, 
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet, 
-		vaoId_3DS, nvert_3DS, vaoId_OBJ, nvert_OBJ, // VAO's i nombre de vèrtexs dels objectes 3DS i OBJ
+		// antiguo vaoId_3DS, nvert_3DS, vaoId_OBJ, nvert_OBJ, // VAO's i nombre de vèrtexs dels objectes 3DS i OBJ
+		FIT_3DS, FIT_OBJ, // VAO's i nombre de vèrtexs dels objectes 3DS i OBJ
 		ViewMatrix, GTMatrix);
 
 //	Dibuix Coordenades Món i Reixes.
@@ -2462,19 +2468,18 @@ void CEntornVGIView::OnMouseMove(UINT nFlags, CPoint point)
 // Entorn VGI: Determinació dels angles (en graus) segons l'increment
 //				horitzontal i vertical de la posició del mouse per càmeres Esfèrica i Geode.
 		CSize gir = m_PosEAvall - point;
-		CPoint posEAvallOld = m_PosEAvall;
+		// antiguo CPoint posEAvallOld = m_PosEAvall;
 		m_PosEAvall = point;
 		if (camera == CAM_ESFERICA)
 		{	// Càmera Esfèrica
-			OPV.beta = OPV.beta + gir.cx / 2;
-			//OPV.alfa = OPV.alfa + gir.cy / 2;
+			OPV.beta = OPV.beta - gir.cx / 2;
+			OPV.alfa = OPV.alfa + gir.cy / 2;
 
 			// Entorn VGI: Control per evitar el creixement desmesurat dels angles.
 			if (OPV.alfa >= 360)	OPV.alfa = OPV.alfa - 360;
 			if (OPV.alfa < 0)			OPV.alfa = OPV.alfa + 360;
 			if (OPV.beta >= 360)	OPV.beta = OPV.beta - 360;
 			if (OPV.beta < 0)			OPV.beta = OPV.beta + 360;
-
 
 			// zoom amb el botó esquerra
 			CSize zoomincr = posEAvallOld - point;
@@ -2807,8 +2812,8 @@ void CEntornVGIView::OnArxiuObrirFitxerObj()
 	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);	// Activem contexte OpenGL
 
 	if (ObOBJ == NULL) ObOBJ = new COBJModel;
-	if (vaoId_OBJ != 0) deleteVAO(FIT_OBJ); // Eliminar VAO anterior.
-	vaoId_OBJ = ObOBJ->LoadModel(nomfitx, FIT_OBJ, nvert_OBJ);	// Carregar objecte OBJ AMB textura
+	if (vaoId_OBJ != 0) deleteVAOList(FIT_OBJ); // Eliminar VAO anterior.
+	vaoId_OBJ = ObOBJ->LoadModel(nomfitx, FIT_OBJ);	// Carregar objecte OBJ AMB textura
 
 //	Pas de paràmetres textura al shader
 	if (shader_menu != CAP_SHADER) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
@@ -2852,8 +2857,9 @@ void CEntornVGIView::OnArxiuObrirFitxer3ds()
 	Ob3DS->Carregar3DS(nomfitx);
 
 // Precompilació de dos objectes nous: OBJECTE3DS: Objecte 3DS sense textures i OBJECTE3DST amb textures,
-	if (vaoId_3DS != 0) deleteVAO(FIT_3DS); // Eliminar VAO anterior.
-	vaoId_3DS = Ob3DS->Dibuixa3DS(false, FIT_3DS, nvert_3DS);
+	vaoId_3DS = Get_VAOId(FIT_3DS);
+	if (vaoId_3DS != 0) deleteVAOList(FIT_3DS); // Eliminar VAO anterior.
+	Ob3DS->Dibuixa3DS(false, FIT_3DS);
 
 //	Pas de paràmetres textura al shader
 	if (shader_menu != CAP_SHADER) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
@@ -3238,7 +3244,8 @@ void CEntornVGIView::OnVistaSkyBox()
 	if (!skC_programID) skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
 
 // Càrrega VAO Skybox Cube
-	if (!skC_VAOID) skC_VAOID = loadCubeSkybox_VAO();
+	if (skC_VAOID.vaoId==-1) skC_VAOID = loadCubeSkybox_VAO();
+	Set_VAOList(CUBE_SKYBOX, skC_VAOID);
 
 	if (!cubemapTexture)
 	{	// load Skybox textures
@@ -3384,10 +3391,21 @@ void CEntornVGIView::OnObjecteCub()
 // TODO: Agregue aquí su código de controlador de comandos
 
 	objecte = CUB;
+	CVAO cubeVAO;
 
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
 
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+	
+	//netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);				// Neteja VAO Cub
+	cubeVAO = loadglutSolidCube_VAO(1.0);	// Càrrega cub de costat 1 com a VAO
+	Set_VAOList(GLUT_CUBE, cubeVAO);		// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3407,9 +3425,21 @@ void CEntornVGIView::OnObjecteCubRGB()
 {
 // TODO: Agregue aquí su código de controlador de comandos
 	objecte = CUB_RGB;
+	CVAO cubeVAO;
 
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
+
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+	//netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLUT_CUBE_RGB) != 0) deleteVAOList(GLUT_CUBE_RGB);
+	cubeVAO = loadglutSolidCubeRGB_VAO(1.0);	// Càrrega cub RGB de costat 1 com a VAO
+	Set_VAOList(GLUT_CUBE_RGB, cubeVAO);		// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE_RGB.
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3433,6 +3463,17 @@ void CEntornVGIView::OnObjecteEsfera()
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
 
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+	CVAO sphereVAO = loadgluSphere_VAO(1.0, 20,20);	// Càrrega cub RGB de costat 1 com a VAO
+	Set_VAOList(GLU_SPHERE, sphereVAO);
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
 }
@@ -3453,6 +3494,17 @@ void CEntornVGIView::OnObjecteTetera()
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
 
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+	//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+	CVAO teteraVAO = loadglutSolidTeapot_VAO(1.0);	// Càrrega Teapot de costat 1 com a VAO
+	Set_VAOList(GLUT_TEAPOT, teteraVAO);
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
 }
@@ -3470,11 +3522,39 @@ void CEntornVGIView::OnUpdateObjecteTetera(CCmdUI *pCmdUI)
 // OBJECTE ARC
 void CEntornVGIView::OnObjecteArc()
 {
+	CColor color_Mar;
+	CVAO objectVAO;
+
+	color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 1.0;
 // TODO: Agregue aquí su código de controlador de comandos
 	objecte = ARC;
 
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
+
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+	// Càrrega dels VAO's per a construir objecte ARC
+	//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+	objectVAO = loadglutSolidCube_VAO(1.0);		// Càrrega Cub de costat 1 com a VAO
+	Set_VAOList(GLUT_CUBE, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+	if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+	objectVAO = loadgluSphere_VAO(0.5, 20, 20);
+	Set_VAOList(GLU_SPHERE, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLU_SPHERE.
+
+	if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+	objectVAO = loadglutSolidTeapot_VAO(1.0);
+	Set_VAOList(GLUT_TEAPOT, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_TEAPOT.
+
+	if (Get_VAOId(MAR_FRACTAL_VAO) != 0) deleteVAOList(MAR_FRACTAL_VAO);
+	objectVAO = loadSea_VAO(color_Mar);
+	Set_VAOList(MAR_FRACTAL_VAO, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició MAR_FRACTAL_VAO.
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3494,9 +3574,50 @@ void CEntornVGIView::OnObjecteTie()
 {
 // TODO: Agregue aquí su código de controlador de comandos
 	objecte = TIE;
+	CVAO objectVAO;
 
 //  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 //	Canviar l'escala per a centrar la vista (Ortogràfica)
+
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega dels VAO's per a construir objecte ARC
+	//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLU_CYLINDER) != 0) deleteVAOList(GLU_CYLINDER);
+	objectVAO = loadgluCylinder_VAO(5.0f, 5.0f, 0.5f, 6, 1);	// Càrrega cilindre com a VAO
+	//Set_VAOList(GLUT_CYLINDER, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CYLINDER.
+
+	if (Get_VAOId(GLU_DISK) != 0)deleteVAOList(GLU_DISK);
+	objectVAO = loadgluDisk_VAO(0.0f, 5.0f, 6, 1);
+	//Set_VAOList(GLU_DISK, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLU_DISK.
+
+	if (Get_VAOId(GLUT_USER1) != 0)deleteVAOList(GLUT_USER1);
+	objectVAO = loadgluCylinder_VAO(5.0f, 5.0f, 2.0f, 6, 1);	// Càrrega cilindre com a VAO
+	Set_VAOList(GLUT_USER1, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_USER1.
+
+	if (Get_VAOId(GLUT_CUBE) != 0)deleteVAOList(GLUT_CUBE);
+	objectVAO = loadglutSolidCube_VAO(1.0);
+	Set_VAOList(GLUT_CUBE, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+	if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+	objectVAO = loadglutSolidTorus_VAO(1.0, 5.0, 20, 20);
+	Set_VAOList(GLUT_TORUS, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_TORUS.
+
+	if (Get_VAOId(GLUT_USER2) != 0)deleteVAOList(GLUT_USER2);
+	objectVAO = loadgluCylinder_VAO(1.0f, 0.5f, 5.0f, 60, 1);	// Càrrega cilindre com a VAO
+	Set_VAOList(GLUT_USER2, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_USER2.
+
+	if (Get_VAOId(GLUT_USER3) != 0)deleteVAOList(GLUT_USER3);
+	objectVAO = loadgluCylinder_VAO(0.35f, 0.35f, 5.0f, 80, 1);	// Càrrega cilindre com a VAO
+	Set_VAOList(GLUT_USER3, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_USER3.
+
+	if (Get_VAOId(GLUT_USER4) != 0)deleteVAOList(GLUT_USER4);
+	objectVAO = loadgluCylinder_VAO(4.0f, 2.0f, 10.25f, 40, 1);	// Càrrega cilindre com a VAO
+	Set_VAOList(GLUT_USER4, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_USER4.
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3517,6 +3638,8 @@ void CEntornVGIView::OnUpdateObjecteTie(CCmdUI *pCmdUI)
 void CEntornVGIView::OnObjeteCorbaBezier()
 {
 // TODO: Agregue aquí su código de controlador de comandos
+	CVAO objectVAO;
+
 	nom = "";
 	objecte = C_BEZIER;		sw_material[4] = true;
 
@@ -3539,6 +3662,22 @@ void CEntornVGIView::OnObjeteCorbaBezier()
 
 // 	---- Entorn VGI: Modificar R per centrar Vista amb mida de l'objecte
 
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega dels VAO's per a construir la corba Bezier
+	//	netejaVAOList();						// Neteja Llista VAO.
+	deleteVAOList(GLU_SPHERE);
+	objectVAO = loadgluSphere_VAO(5.0, 20, 20);
+	Set_VAOList(GLU_SPHERE, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+	if (Get_VAOId(CRV_BEZIER) != 0) deleteVAOList(CRV_BEZIER);
+	CVAO BezierVAO = load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false);
+	Set_VAOList(CRV_BEZIER, BezierVAO);
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
 }
@@ -3558,6 +3697,18 @@ void CEntornVGIView::OnObjecteCorbaLemniscata()
 	objecte = C_LEMNISCATA;		sw_material[4] = true;
 
 // 	---- Entorn VGI: Modificar R per centrar Vista amb mida de l'objecte
+
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega dels VAO's per a construir la corba Bezier
+	//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(CRV_LEMNISCATA3D) != 0) deleteVAOList(CRV_LEMNISCATA3D);
+	CVAO Lemni3DVAO = load_Lemniscata3D_VAO(800, pas_CS * 20.0);
+	Set_VAOList(CRV_LEMNISCATA3D, Lemni3DVAO);
+
+	// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3597,6 +3748,23 @@ void CEntornVGIView::OnObjecteCorbaBSpline()
 	npts_T = llegir_ptsC(nomfitx);
 
 // 	---- Entorn VGI: Modificar R per centrar Vista amb mida de l'objecte
+
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega dels VAO's per a construir la corba BSpline
+		//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+	CVAO objectVAO = loadgluSphere_VAO(5.0, 20, 20);
+	Set_VAOList(GLU_SPHERE, objectVAO);			// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+	if (Get_VAOId(CRV_BSPLINE) != 0) deleteVAOList(CRV_BSPLINE);
+	CVAO BSplineVAO = load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS);
+	Set_VAOList(CRV_BSPLINE, BSplineVAO);
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+
 
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
@@ -3671,8 +3839,31 @@ void CEntornVGIView::OnUpdateObjecteMatriuPrimitives(CCmdUI* pCmdUI)
 void CEntornVGIView::OnObjecteMatriuPrimitivesVBO()
 {
 // TODO: Agregue aquí su código de controlador de comandos
+// ------- VAO
+	CVAO objectVAO;
+
 	objecte = MATRIUP_VAO;
 
+// Entorn VGI: Activació el contexte OpenGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+// Càrrega dels VAO's per a construir objecte ARC
+	//	netejaVAOList();						// Neteja Llista VAO.
+	if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+	objectVAO = loadglutSolidCube_VAO(1.0f);
+	Set_VAOList(GLUT_CUBE, objectVAO);
+
+	if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+	objectVAO = loadglutSolidTorus_VAO(2.0, 3.0, 20, 20);
+	Set_VAOList(GLUT_TORUS, objectVAO);
+
+	if (Get_VAOId(GLUT_SPHERE) != 0)deleteVAOList(GLU_SPHERE);
+	objectVAO = loadgluSphere_VAO(1.0, 20, 20);
+	Set_VAOList(GLU_SPHERE, objectVAO);
+
+// Entorn VGI: Activació el contexte OpenGL. Permet la coexistencia d'altres contextes de generació
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+	
 // Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
 }
@@ -4288,6 +4479,7 @@ void CEntornVGIView::OnIluminacioTexturaFitxerimatge()
 // TODO: Agregue aquí su código de controlador de comandos
 	CString nomf;
 	t_textura = FITXERIMA;		tFlag_invert_Y = true;
+	textura = true;
 
 // Obrir diàleg de lectura de fitxer
 	CFileDialog openTextur(TRUE, NULL, NULL,
@@ -4840,8 +5032,7 @@ std::string CEntornVGIView::CString2String(const CString& cString)
 
 void CEntornVGIView::OnObjecteTetris()
 {
-	// TODO: Agregue aquí su código de controlador de comandos
-
+	/* IMPORTAR
 	objecte = OBJOBJ;	textura = false;		tFlag_invert_Y = false;
 
 
@@ -4859,6 +5050,19 @@ void CEntornVGIView::OnObjecteTetris()
 	if (shader_menu != CAP_SHADER) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 
 	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);	// Desactivem contexte OpenGL
+	*/
+	objecte = CUB;
+	CVAO cubeVAO;
 
+	// Activació openGL
+	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
+
+	if (Get_VAOId(GLUT_USER1) != 0) deleteVAOList(GLUT_USER1);				// Neteja VAO USER1
+	cubeVAO = loadglutSolidCube_VAO(1.0);	
+	Set_VAOList(GLUT_USER1, cubeVAO);		// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_User1 = 36.
+
+	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
+
+	// Crida a OnPaint() per redibuixar l'escena
 	InvalidateRect(NULL, false);
 }

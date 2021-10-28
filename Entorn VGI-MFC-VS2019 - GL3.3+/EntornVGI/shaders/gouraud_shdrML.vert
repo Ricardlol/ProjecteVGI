@@ -82,7 +82,9 @@ void main ()
 
 //-L77- Compute emissive term
     vec3 Iemissive = vec3 (0.0,0.0,0.0);	// Intensitat emissiva de l’objecte.
-    if (sw_intensity[0])  Iemissive = material.emission.rgb;
+    if (sw_intensity[0])  {	if (sw_material) Iemissive = material.emission.rgb;
+					else Iemissive = in_Color.rgb;
+			  }
 
 //-L81- Compute ambient term
     vec3 Iambient = vec3 (0.0,0.0,0.0);		// Intensitat ambient reflexada

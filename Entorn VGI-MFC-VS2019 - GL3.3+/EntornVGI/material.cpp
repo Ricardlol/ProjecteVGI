@@ -103,7 +103,7 @@ MATERIAL  materials[MAX_MATERIALS] =
 |* SeleccionaMaterial                                                         *|
 |* Selecciona un dels materials del vector materials                          *|
 \******************************************************************************/
-void SeleccionaMaterial(GLuint sh_programID, int quin,bool sw_mater[4])
+void SeleccionaMaterial(GLuint sh_programID, int quin,bool sw_mater[5])
 {
 	//const float zeros[4]={0.0f,0.0f,0.0f,1.0f};
 	MATERIAL material;
@@ -111,6 +111,7 @@ void SeleccionaMaterial(GLuint sh_programID, int quin,bool sw_mater[4])
 // Pas vector booleà sw_materials al Shader
 	//glUniform4uiv(glGetUniformLocation(sh_programID, "sw_intensity"), 1, sw_mater);
 	glUniform4i(glGetUniformLocation(sh_programID, "sw_intensity"), sw_mater[0], sw_mater[1], sw_mater[2], sw_mater[3]);
+	glUniform1i(glGetUniformLocation(sh_programID, "sw_material"), sw_mater[4]);
 	
 	if ((quin >= 0) && (quin<MAX_MATERIALS))
 		{	// Component d'emissió de llum del material

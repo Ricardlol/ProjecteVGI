@@ -1,21 +1,2 @@
-﻿  stdafx.cpp
-  ChildFrm.cpp
-  ClassView.cpp
-  EntornVGI.cpp
-  EntornVGIDoc.cpp
-  EntornVGIView.cpp
-  escena.cpp
-  FileView.cpp
-  glut_geometry.cpp
-  Load3DS.cpp
-  MainFrm.cpp
-  material.cpp
-  Obj3DS.cpp
-  objLoader.cpp
-  OutputWnd.cpp
-  PropertiesWnd.cpp
-  shader.cpp
-  ViewTree.cpp
-  visualitzacio.cpp
-     Creating library C:\Users\mcaix\Desktop\ProjecteVGI\Entorn VGI-MFC-VS2019 - GL3.3+\Debug\EntornVGI.lib and object C:\Users\mcaix\Desktop\ProjecteVGI\Entorn VGI-MFC-VS2019 - GL3.3+\Debug\EntornVGI.exp
-  EntornVGI.vcxproj -> C:\Users\mcaix\Desktop\ProjecteVGI\Entorn VGI-MFC-VS2019 - GL3.3+\Debug\EntornVGI.exe
+﻿  EntornVGIView.cpp
+  EntornVGI.vcxproj -> C:\Users\ricar.LAPTOP-D6I7L1KP\source\repos\Visualitzacio grafica\Entorn VGI-MFC-VS2019 - GL3.3+\Debug\EntornVGI.exe
