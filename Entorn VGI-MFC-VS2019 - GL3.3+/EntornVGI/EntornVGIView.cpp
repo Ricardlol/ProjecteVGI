@@ -391,8 +391,7 @@ CEntornVGIView::CEntornVGIView()
 	w = 0;				h = 0;								// Mides finestra
 	w_old = 0;			h_old = 0;							// Copia mides finestre per a FullScreen
 	OPV.R = 15.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;	// Origen PV en esfèriques
-	//Vis_Polar = POLARZ;
-	Vis_Polar = POLARY;
+	Vis_Polar = POLARZ;
 
 // Entorn VGI: Color de fons i de l'objecte
 	fonsR = true;		fonsG = true;		fonsB = true;
@@ -971,7 +970,6 @@ void CEntornVGIView::OnPaint()
 				front_faces, oculta, test_vis, back_line,
 				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 				eixos, grid, hgrid);
-				//antiguo eixos, grid, hgrid, camerax);
 					}
 		else if (camera == CAM_NAVEGA) {
 			ViewMatrix = Vista_Navega(shader_programID, opvN, false, n, vpv, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
@@ -1007,10 +1005,7 @@ void CEntornVGIView::OnPaint()
 		if (!eixos_Id) eixos_Id = deixos();						// Funció que defineix els Eixos Coordenades Món com un VAO.
 
 // Definció projecció PERSPECTIVA
-		/// TOTES LES INICIALITZACIONS
-		projeccio = PERSPECT;
-		OnVistaSkyBox();
-		OnIluminacioGouraud();
+		//projeccio = PERSPECT;
 
 // Crida a la funció Fons Blanc
 		FonsB();
@@ -1051,7 +1046,6 @@ void CEntornVGIView::dibuixa_Escena()
 	dibuixa_EscenaGL(shader_programID, eixos, eixos_Id, grid, hgrid, objecte, col_obj, sw_material, 
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet, 
-		// antiguo vaoId_3DS, nvert_3DS, vaoId_OBJ, nvert_OBJ, // VAO's i nombre de vèrtexs dels objectes 3DS i OBJ
 		FIT_3DS, FIT_OBJ, // VAO's i nombre de vèrtexs dels objectes 3DS i OBJ
 		ViewMatrix, GTMatrix);
 
@@ -2468,7 +2462,6 @@ void CEntornVGIView::OnMouseMove(UINT nFlags, CPoint point)
 // Entorn VGI: Determinació dels angles (en graus) segons l'increment
 //				horitzontal i vertical de la posició del mouse per càmeres Esfèrica i Geode.
 		CSize gir = m_PosEAvall - point;
-		// antiguo CPoint posEAvallOld = m_PosEAvall;
 		m_PosEAvall = point;
 		if (camera == CAM_ESFERICA)
 		{	// Càmera Esfèrica
@@ -2480,12 +2473,6 @@ void CEntornVGIView::OnMouseMove(UINT nFlags, CPoint point)
 			if (OPV.alfa < 0)			OPV.alfa = OPV.alfa + 360;
 			if (OPV.beta >= 360)	OPV.beta = OPV.beta - 360;
 			if (OPV.beta < 0)			OPV.beta = OPV.beta + 360;
-
-			// zoom amb el botó esquerra
-			CSize zoomincr = posEAvallOld - point;
-			long int incr = zoomincr.cy / 4.0;
-			OPV.R = OPV.R + incr;
-			if (OPV.R < 0.25) OPV.R = 0.25;
 		}
 		else { // Càmera Geode
 				OPV_G.beta = OPV_G.beta + gir.cx / 2;
@@ -5032,37 +5019,6 @@ std::string CEntornVGIView::CString2String(const CString& cString)
 
 void CEntornVGIView::OnObjecteTetris()
 {
-	/* IMPORTAR
-	objecte = OBJOBJ;	textura = false;		tFlag_invert_Y = false;
-
-
-	nom = "../../objects/fig2_color.obj";
-	
-	char* nomfitx = CString2Char(nom);
-
-	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);	// Activem contexte OpenGL
-
-	if (ObOBJ == NULL) ObOBJ = new COBJModel;
-	if (vaoId_OBJ != 0) deleteVAO(FIT_OBJ); // Eliminar VAO anterior.
-	vaoId_OBJ = ObOBJ->LoadModel(nomfitx, FIT_OBJ, nvert_OBJ);	// Carregar objecte OBJ AMB textura
-
-	if (shader_menu != CAP_SHADER) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
-	if (shader_menu != CAP_SHADER) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
-
-	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);	// Desactivem contexte OpenGL
-	*/
-	objecte = CUB;
-	CVAO cubeVAO;
-
-	// Activació openGL
-	wglMakeCurrent(m_pDC->GetSafeHdc(), m_hRC);
-
-	if (Get_VAOId(GLUT_USER1) != 0) deleteVAOList(GLUT_USER1);				// Neteja VAO USER1
-	cubeVAO = loadglutSolidCube_VAO(1.0);	
-	Set_VAOList(GLUT_USER1, cubeVAO);		// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_User1 = 36.
-
-	wglMakeCurrent(m_pDC->GetSafeHdc(), NULL);
-
-	// Crida a OnPaint() per redibuixar l'escena
-	InvalidateRect(NULL, false);
+	// TODO: Agregue aquí su código de controlador de comandos
+	glutSolidTetris(1, GLUT_USER1);
 }

@@ -37,8 +37,6 @@ protected: // Crear sólo a partir de serialización
 
 // Atributos
 public:
-	// se li passa a vista_esferica i serveix per, des del entornView, modificar a la força la posicó de la càmera sobre l'eix X
-	// int camerax;
 	CEntornVGIDoc* GetDocument() const;
 
 //-------------- Entorn VGI: Variables globals de CPractivaView
@@ -441,7 +439,6 @@ public:
 	afx_msg void OnUpdateIluminacioTexturaFlagInvertY(CCmdUI* pCmdUI);
 	afx_msg void OnMaterialReflmaterial();
 	afx_msg void OnUpdateMaterialReflMaterial(CCmdUI* pCmdUI);
-	afx_msg void OnObjecteTetris();
 };
 
 #ifndef _DEBUG  // Versión de depuración en EntornVGIView.cpp

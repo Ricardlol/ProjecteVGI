@@ -252,7 +252,7 @@ void glutSolidTetris(GLdouble dSize, int idPiece)
 CVAO loadglutSolidCube_VAO(GLdouble dSize)
 {
 	GLdouble size = dSize * 0.5f;
-	GLuint vaoId = 36, vboId = 36;
+	GLuint vaoId = 0, vboId = 0;
 	CVAO auxVAO;
 
 	// cube ///////////////////////////////////////////////////////////////////////
