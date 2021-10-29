@@ -391,7 +391,7 @@ CEntornVGIView::CEntornVGIView()
 	w = 0;				h = 0;								// Mides finestra
 	w_old = 0;			h_old = 0;							// Copia mides finestre per a FullScreen
 	OPV.R = 15.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;	// Origen PV en esfèriques
-	Vis_Polar = POLARZ;
+	Vis_Polar = POLARY;
 
 // Entorn VGI: Color de fons i de l'objecte
 	fonsR = true;		fonsG = true;		fonsB = true;
@@ -969,7 +969,7 @@ void CEntornVGIView::OnPaint()
 				ViewMatrix = Vista_Esferica(shader_programID, OPV, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
 				front_faces, oculta, test_vis, back_line,
 				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
-				eixos, grid, hgrid);
+				eixos, grid, hgrid, camerax);
 					}
 		else if (camera == CAM_NAVEGA) {
 			ViewMatrix = Vista_Navega(shader_programID, opvN, false, n, vpv, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
@@ -2462,26 +2462,34 @@ void CEntornVGIView::OnMouseMove(UINT nFlags, CPoint point)
 // Entorn VGI: Determinació dels angles (en graus) segons l'increment
 //				horitzontal i vertical de la posició del mouse per càmeres Esfèrica i Geode.
 		CSize gir = m_PosEAvall - point;
+		CPoint posEAvallOld = m_PosEAvall;
 		m_PosEAvall = point;
 		if (camera == CAM_ESFERICA)
 		{	// Càmera Esfèrica
-			OPV.beta = OPV.beta - gir.cx / 2;
-			OPV.alfa = OPV.alfa + gir.cy / 2;
+			OPV.beta = OPV.beta + gir.cx / 2;
+			//OPV.alfa = OPV.alfa + gir.cy / 2;
 
 			// Entorn VGI: Control per evitar el creixement desmesurat dels angles.
 			if (OPV.alfa >= 360)	OPV.alfa = OPV.alfa - 360;
 			if (OPV.alfa < 0)			OPV.alfa = OPV.alfa + 360;
 			if (OPV.beta >= 360)	OPV.beta = OPV.beta - 360;
 			if (OPV.beta < 0)			OPV.beta = OPV.beta + 360;
+
+
+			// zoom amb el botó esquerra
+			CSize zoomincr = posEAvallOld - point;
+			long int incr = zoomincr.cy / 4.0;
+			OPV.R = OPV.R + incr;
+			if (OPV.R < 0.25) OPV.R = 0.25;
 		}
 		else { // Càmera Geode
-				OPV_G.beta = OPV_G.beta + gir.cx / 2;
-				OPV_G.alfa = OPV_G.alfa + gir.cy / 2;
-				// Entorn VGI: Control per evitar el creixement desmesurat dels angles
-				if (OPV_G.alfa >= 360.0f)	OPV_G.alfa = OPV_G.alfa - 360;
-				if (OPV_G.alfa < 0.0f)		OPV_G.alfa = OPV_G.alfa + 360;
-				if (OPV_G.beta >= 360.f)	OPV_G.beta = OPV_G.beta - 360;
-				if (OPV_G.beta < 0.0f)		OPV_G.beta = OPV_G.beta + 360;
+			OPV_G.beta = OPV_G.beta + gir.cx / 2;
+			OPV_G.alfa = OPV_G.alfa + gir.cy / 2;
+			// Entorn VGI: Control per evitar el creixement desmesurat dels angles
+			if (OPV_G.alfa >= 360.0f)	OPV_G.alfa = OPV_G.alfa - 360;
+			if (OPV_G.alfa < 0.0f)		OPV_G.alfa = OPV_G.alfa + 360;
+			if (OPV_G.beta >= 360.f)	OPV_G.beta = OPV_G.beta - 360;
+			if (OPV_G.beta < 0.0f)		OPV_G.beta = OPV_G.beta + 360;
 		}
 		InvalidateRect(NULL, false);
 	}
